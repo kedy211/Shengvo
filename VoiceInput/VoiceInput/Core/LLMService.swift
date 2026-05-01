@@ -111,7 +111,7 @@ class LLMService {
             ],
             "temperature": 0.3,
             "max_tokens": 4096,
-            "reasoning_effort": "none"
+            "reasoning_effort": config.llmReasoningEffort
         ]
 
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)

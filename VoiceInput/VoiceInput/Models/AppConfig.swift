@@ -19,6 +19,7 @@ struct AppConfig: Codable {
     var llmAPIKey: String = "9ac3483f-0d94-4f5e-8455-99eda5c94ae3"
     var llmModel: String = "doubao-pro-32k"
     var llmMinChars: Int = 10
+    var llmReasoningEffort: String = "medium"
     var minRecordingDuration: Double = 1.0 // seconds - recordings shorter than this are discarded
     var llmSystemPrompt: String = """
     你是一个语音文字后处理助手。你的任务是将用户口语化的语音识别文本，转换为结构清晰、语法正确、符合书面习惯的最终输出。请严格按照以下步骤处理：

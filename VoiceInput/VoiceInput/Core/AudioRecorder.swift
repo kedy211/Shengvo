@@ -36,7 +36,7 @@ class AudioRecorder: ObservableObject {
                     sum += channelData[i] * channelData[i]
                 }
                 let rms = sqrt(sum / Float(frameLength))
-                let level = min(1.0, rms * 5)
+                let level = min(1.0, rms * 15)
                 DispatchQueue.main.async {
                     self.currentLevel = level
                 }

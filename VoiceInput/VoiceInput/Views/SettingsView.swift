@@ -234,6 +234,17 @@ struct SettingsView: View {
                                     .foregroundColor(.secondary)
                             }
                         }
+
+                        LabeledField(label: "推理强度 (Reasoning Effort)") {
+                            Picker("", selection: $config.llmReasoningEffort) {
+                                Text("minimal").tag("minimal")
+                                Text("low").tag("low")
+                                Text("medium").tag("medium")
+                                Text("high").tag("high")
+                            }
+                            .pickerStyle(.segmented)
+                            .frame(width: 280)
+                        }
                     }
                 }
                 .padding(8)

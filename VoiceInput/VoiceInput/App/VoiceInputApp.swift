@@ -58,12 +58,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
 
         if let button = statusItem.button {
-            if #available(macOS 11.0, *) {
-                button.image = NSImage(systemSymbolName: "mic.fill", accessibilityDescription: "Shengvo")
-                button.image?.isTemplate = true
-            } else {
-                button.title = "🎤"
-            }
+            let icon = NSImage(named: "AppIcon")
+            icon?.size = NSSize(width: 18, height: 18)
+            button.image = icon
         }
 
         menu = NSMenu()
@@ -80,25 +77,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         DispatchQueue.main.async {
             guard let button = self.statusItem.button else { return }
 
-            if #available(macOS 11.0, *) {
-                switch state {
-                case .idle:
-                    button.image = NSImage(systemSymbolName: "mic.fill", accessibilityDescription: "Shengvo")
-                    button.contentTintColor = nil
-                case .recording:
-                    button.image = NSImage(systemSymbolName: "mic.fill", accessibilityDescription: "Recording")
-                    button.contentTintColor = .systemRed
-                case .processing:
-                    button.image = NSImage(systemSymbolName: "mic.fill", accessibilityDescription: "Processing")
-                    button.contentTintColor = .systemYellow
-                }
-                button.image?.isTemplate = true
-            } else {
-                switch state {
-                case .idle: button.title = "🎤"
-                case .recording: button.title = "🔴"
-                case .processing: button.title = "🟡"
-                }
+            let icon = NSImage(named: "AppIcon")
+            icon?.size = NSSize(width: 18, height: 18)
+
+            switch state {
+            case .idle:
+                button.image = icon
+                button.contentTintColor = nil
+            case .recording:
+                button.image = icon
+                button.contentTintColor = .systemRed
+            case .processing:
+                button.image = icon
+                button.contentTintColor = .systemYellow
             }
         }
     }
