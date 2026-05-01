@@ -4,6 +4,7 @@ import Carbon
 struct HotKeyRecorderView: View {
     @Binding var keyCode: UInt32
     @Binding var modifiers: UInt32
+    @Binding var usesFn: Bool
     @State private var isRecording = false
     @State private var displayText: String = ""
 
@@ -40,18 +41,21 @@ struct HotKeyRecorderView: View {
             }
         }
         .background(
-            HotKeyCaptureView(isRecording: $isRecording, keyCode: $keyCode, modifiers: $modifiers)
+            HotKeyCaptureView(isRecording: $isRecording, keyCode: $keyCode, modifiers: $modifiers, usesFn: $usesFn)
                 .frame(width: 0, height: 0)
         )
     }
 
     private func formatHotKey() -> String {
         var desc = ""
+        if usesFn { desc += "fn " }
         if modifiers & UInt32(cmdKey) != 0 { desc += "⌘" }
         if modifiers & UInt32(shiftKey) != 0 { desc += "⇧" }
         if modifiers & UInt32(controlKey) != 0 { desc += "⌃" }
         if modifiers & UInt32(optionKey) != 0 { desc += "⌥" }
-        desc += keyCodeToString(keyCode)
+        if keyCode != 0 {
+            desc += keyCodeToString(keyCode)
+        }
         return desc
     }
 
@@ -99,6 +103,10 @@ struct HotKeyRecorderView: View {
         case kVK_F10: return "F10"
         case kVK_F11: return "F11"
         case kVK_F12: return "F12"
+        case kVK_LeftArrow: return "←"
+        case kVK_RightArrow: return "→"
+        case kVK_UpArrow: return "↑"
+        case kVK_DownArrow: return "↓"
         default: return "?"
         }
     }
@@ -108,13 +116,15 @@ struct HotKeyCaptureView: NSViewRepresentable {
     @Binding var isRecording: Bool
     @Binding var keyCode: UInt32
     @Binding var modifiers: UInt32
+    @Binding var usesFn: Bool
 
     func makeNSView(context: Context) -> HotKeyCaptureNSView {
         let view = HotKeyCaptureNSView()
-        view.onKeyCapture = { capturedKeyCode, capturedModifiers in
+        view.onKeyCapture = { capturedKeyCode, capturedModifiers, capturedUsesFn in
             DispatchQueue.main.async {
                 self.keyCode = capturedKeyCode
                 self.modifiers = capturedModifiers
+                self.usesFn = capturedUsesFn
                 self.isRecording = false
             }
         }
@@ -127,14 +137,25 @@ struct HotKeyCaptureView: NSViewRepresentable {
 }
 
 class HotKeyCaptureNSView: NSView {
-    var onKeyCapture: ((UInt32, UInt32) -> Void)?
+    var onKeyCapture: ((UInt32, UInt32, Bool) -> Void)?
     var isRecording = false {
         didSet {
             if isRecording {
                 window?.makeFirstResponder(self)
+                startFnMonitor()
+            } else {
+                stopFnMonitor()
+                modifierOnlyWorkItem?.cancel()
             }
         }
     }
+
+    private var fnMonitor: Any?
+    private var fnPressed = false
+    private let fnKeyCode: Int = 0x3F
+
+    private var modifierOnlyWorkItem: DispatchWorkItem?
+    private var hasKeyDown = false
 
     override var acceptsFirstResponder: Bool { true }
 
@@ -144,20 +165,97 @@ class HotKeyCaptureNSView: NSView {
             return
         }
 
+        hasKeyDown = true
+        modifierOnlyWorkItem?.cancel()
+
         var modifiers: UInt32 = 0
         if event.modifierFlags.contains(.command) { modifiers |= UInt32(cmdKey) }
         if event.modifierFlags.contains(.shift) { modifiers |= UInt32(shiftKey) }
         if event.modifierFlags.contains(.control) { modifiers |= UInt32(controlKey) }
         if event.modifierFlags.contains(.option) { modifiers |= UInt32(optionKey) }
 
-        // Must have at least one modifier
-        guard modifiers != 0 else { return }
+        let usesFn = fnPressed
+
+        guard modifiers != 0 || usesFn else { return }
 
         let keyCode = UInt32(event.keyCode)
-        onKeyCapture?(keyCode, modifiers)
+        onKeyCapture?(keyCode, modifiers, usesFn)
     }
 
     override func flagsChanged(with event: NSEvent) {
-        // Track modifier key changes for display
+        guard isRecording else { return }
+
+        hasKeyDown = false
+
+        // Update fn state: detect by both keycode 0x3F and .function flag
+        if event.keyCode == fnKeyCode {
+            fnPressed = event.modifierFlags.contains(.function)
+        }
+        // Also check .function flag on any flagsChanged event (some keyboards report fn this way)
+        if event.modifierFlags.contains(.function) {
+            fnPressed = true
+        } else if event.keyCode != fnKeyCode {
+            // Only clear fn if the event is NOT about fn key itself
+            // Don't clear on non-fn modifier events — fn might still be held
+        }
+
+        let hasCmd = event.modifierFlags.contains(.command)
+        let hasShift = event.modifierFlags.contains(.shift)
+        let hasCtrl = event.modifierFlags.contains(.control)
+        let hasOption = event.modifierFlags.contains(.option)
+        let hasAnyStandardModifier = hasCmd || hasShift || hasCtrl || hasOption
+
+        // Current fn state: either tracked or directly from this event's flags
+        let currentFn = fnPressed || event.modifierFlags.contains(.function)
+
+        modifierOnlyWorkItem?.cancel()
+
+        if currentFn && hasAnyStandardModifier && !hasKeyDown {
+            let capturedCmd = hasCmd
+            let capturedShift = hasShift
+            let capturedCtrl = hasCtrl
+            let capturedOption = hasOption
+            let workItem = DispatchWorkItem { [weak self] in
+                guard let self = self else { return }
+                var modifiers: UInt32 = 0
+                if capturedCmd { modifiers |= UInt32(cmdKey) }
+                if capturedShift { modifiers |= UInt32(shiftKey) }
+                if capturedCtrl { modifiers |= UInt32(controlKey) }
+                if capturedOption { modifiers |= UInt32(optionKey) }
+                self.fnPressed = true
+                self.onKeyCapture?(0, modifiers, true)
+            }
+            modifierOnlyWorkItem = workItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: workItem)
+        }
+
+        // If fn released, clear state
+        if event.keyCode == fnKeyCode && !event.modifierFlags.contains(.function) {
+            fnPressed = false
+        }
+    }
+
+    private func startFnMonitor() {
+        fnMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
+            guard let self = self, self.isRecording else { return event }
+            if event.keyCode == self.fnKeyCode {
+                self.fnPressed = event.modifierFlags.contains(.function)
+            }
+            if event.modifierFlags.contains(.function) {
+                self.fnPressed = true
+            }
+            return event
+        }
+    }
+
+    private func stopFnMonitor() {
+        if let monitor = fnMonitor {
+            NSEvent.removeMonitor(monitor)
+            fnMonitor = nil
+        }
+    }
+
+    deinit {
+        stopFnMonitor()
     }
 }

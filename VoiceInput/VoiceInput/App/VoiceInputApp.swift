@@ -99,13 +99,26 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private func setupHotKey() {
         hotKeyManager = HotKeyManager()
         let config = AppConfig.shared
-        hotKeyManager.registerHotKey(
-            keyCode: config.hotKeyKeyCode,
-            modifiers: config.hotKeyModifiers,
-            onTrigger: { [weak self] in
-                self?.toggleRecording()
-            }
-        )
+
+        if config.hotKeyUsesFn {
+            // Use CGEvent tap for fn key combinations
+            hotKeyManager.startFnEventTap(
+                keyCode: config.hotKeyKeyCode,
+                modifiers: config.hotKeyModifiers,
+                onTrigger: { [weak self] _, _ in
+                    self?.toggleRecording()
+                }
+            )
+        } else {
+            // Use Carbon for standard modifier combinations
+            hotKeyManager.registerHotKey(
+                keyCode: config.hotKeyKeyCode,
+                modifiers: config.hotKeyModifiers,
+                onTrigger: { [weak self] in
+                    self?.toggleRecording()
+                }
+            )
+        }
     }
 
     // MARK: - Recording Flow
@@ -407,7 +420,23 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     @objc private func handleSettingsChange() {
         let config = AppConfig.shared
-        hotKeyManager.updateHotKey(keyCode: config.hotKeyKeyCode, modifiers: config.hotKeyModifiers)
+
+        // Stop both mechanisms
+        hotKeyManager.unregisterHotKey()
+        hotKeyManager.stopFnEventTap()
+
+        if config.hotKeyUsesFn {
+            hotKeyManager.startFnEventTap(
+                keyCode: config.hotKeyKeyCode,
+                modifiers: config.hotKeyModifiers,
+                onTrigger: { [weak self] _, _ in
+                    self?.toggleRecording()
+                }
+            )
+        } else {
+            hotKeyManager.updateHotKey(keyCode: config.hotKeyKeyCode, modifiers: config.hotKeyModifiers)
+        }
+
         print("[App] Hotkey updated: \(config.hotKeyDescription)")
     }
 
@@ -423,6 +452,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     @objc private func quitApp() {
         hotKeyManager?.unregisterHotKey()
+        hotKeyManager?.stopFnEventTap()
         NSApplication.shared.terminate(nil)
     }
 }

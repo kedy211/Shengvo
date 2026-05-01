@@ -67,7 +67,8 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     HotKeyRecorderView(
                         keyCode: $config.hotKeyKeyCode,
-                        modifiers: $config.hotKeyModifiers
+                        modifiers: $config.hotKeyModifiers,
+                        usesFn: $config.hotKeyUsesFn
                     )
                 }
                 .padding(8)
