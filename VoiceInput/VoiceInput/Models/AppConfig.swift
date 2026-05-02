@@ -9,15 +9,15 @@ struct AppConfig: Codable {
     var hotKeyUsesFn: Bool = false // Whether fn is part of the hotkey
 
     // ASR - Volcano Engine
-    var asrAppID: String = "9958934610"
-    var asrAccessToken: String = "M5BfDAUJ4JrzIhbhMqaJct8s39H3MNDL"
-    var asrSecretKey: String = "GBkiU3TeyedJj1cGV66gxpD9pFbZ6VR6"
+    var asrAppID: String = ""
+    var asrAccessToken: String = ""
+    var asrSecretKey: String = ""
     var customWords: [String] = []
 
     // LLM - Volcano Engine Ark
     var llmEnabled: Bool = true
     var llmBaseURL: String = "https://ark.cn-beijing.volces.com/api/v3"
-    var llmAPIKey: String = "9ac3483f-0d94-4f5e-8455-99eda5c94ae3"
+    var llmAPIKey: String = ""
     var llmModel: String = "doubao-seed-2-0-lite-260215"
     var llmMinChars: Int = 10
     var llmReasoningEffort: String = "minimal"
