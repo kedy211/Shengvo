@@ -126,4 +126,4 @@ VoiceInput/
 
 ## 开源协议
 
-[MIT License](LICENSE)
+[MPL 2.0 License](LICENSE)
