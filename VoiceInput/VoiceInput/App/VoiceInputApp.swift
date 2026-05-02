@@ -27,11 +27,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var isProcessing = false
     private var settingsWindow: NSWindow?
     private var setupWindow: NSWindow?
+    private var historyWindow: NSWindow?
+    private var customWordsWindow: NSWindow?
     private var levelTimer: Timer?
     private var processStartTime: CFAbsoluteTime = 0
     private var recordingStartTime: CFAbsoluteTime = 0
     private var escMonitors: [Any] = []
     private var targetAppName: String?
+    private var lastRawText: String = ""
 
     // MARK: - App Lifecycle
 
@@ -65,6 +68,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         menu = NSMenu()
         menu.addItem(NSMenuItem(title: "状态: 就绪", action: nil, keyEquivalent: ""))
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(NSMenuItem(title: "自定义识别词...", action: #selector(openCustomWords), keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: "历史记录...", action: #selector(openHistory), keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "设置...", action: #selector(openSettings), keyEquivalent: ","))
         menu.addItem(NSMenuItem.separator())
@@ -274,17 +280,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     private func processTextWithLLM(_ text: String) {
+        lastRawText = text
         let config = AppConfig.shared
         guard config.llmEnabled else {
             print("[Timing] LLM 已禁用，跳过处理")
-            pasteText(text)
+            pasteText(text, wasProcessedByLLM: false)
             return
         }
 
         // Skip LLM for short text
         if text.count <= config.llmMinChars {
             print("[Timing] 文本过短(\(text.count)字 ≤ \(config.llmMinChars)字)，跳过 LLM")
-            pasteText(text)
+            pasteText(text, wasProcessedByLLM: false)
             return
         }
 
@@ -302,20 +309,30 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             case .success(let processedText):
                 print("[Timing] LLM 完成: \(String(format: "%.2f", elapsed))s, 总耗时: \(String(format: "%.2f", totalElapsed))s")
                 print("[Timing] 处理结果: \(processedText)")
-                self.pasteText(processedText)
+                self.pasteText(processedText, wasProcessedByLLM: true)
             case .failure(let error):
                 print("[Timing] LLM 失败: \(String(format: "%.2f", elapsed))s, 错误: \(error), 使用原始文本")
-                self.pasteText(text)
+                self.pasteText(text, wasProcessedByLLM: false)
             }
         }
     }
 
-    private func pasteText(_ text: String) {
+    private func pasteText(_ text: String, wasProcessedByLLM: Bool) {
         let startTime = CFAbsoluteTimeGetCurrent()
         let totalElapsed = CFAbsoluteTimeGetCurrent() - processStartTime
         print("[Timing] 总处理耗时: \(String(format: "%.2f", totalElapsed))s")
         print("[App] 准备粘贴: \(text.prefix(50))...")
         print("[App] Accessibility: \(clipboardManager.checkAccessibility() ? "GRANTED" : "NOT GRANTED")")
+
+        // Save to history
+        let entry = HistoryEntry(
+            text: text,
+            rawText: lastRawText,
+            timestamp: Date(),
+            targetApp: targetAppName,
+            wasProcessedByLLM: wasProcessedByLLM
+        )
+        HistoryManager.shared.addEntry(entry)
 
         // Copy to clipboard
         clipboardManager.copyToClipboard(text: text)
@@ -367,6 +384,50 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     // MARK: - Settings
+
+    @objc private func openCustomWords() {
+        if let window = customWordsWindow, window.isVisible {
+            window.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
+
+        let view = CustomWordsView(customWords: .constant(AppConfig.shared.customWords))
+        let hostingController = NSHostingController(rootView: view)
+        let window = NSWindow(contentViewController: hostingController)
+        window.title = "晟语 自定义识别词"
+        window.styleMask = [.titled, .closable, .miniaturizable]
+        window.isReleasedWhenClosed = false
+        window.center()
+        window.setContentSize(NSSize(width: 400, height: 450))
+        window.delegate = self
+
+        customWordsWindow = window
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    @objc private func openHistory() {
+        if let window = historyWindow, window.isVisible {
+            window.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
+
+        let view = HistoryView()
+        let hostingController = NSHostingController(rootView: view)
+        let window = NSWindow(contentViewController: hostingController)
+        window.title = "晟语 历史记录"
+        window.styleMask = [.titled, .closable, .miniaturizable]
+        window.isReleasedWhenClosed = false
+        window.center()
+        window.setContentSize(NSSize(width: 550, height: 500))
+        window.delegate = self
+
+        historyWindow = window
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
 
     @objc private func openSettings() {
         if let window = settingsWindow, window.isVisible {
@@ -443,8 +504,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     // MARK: - NSWindowDelegate
 
     func windowWillClose(_ notification: Notification) {
-        if let window = notification.object as? NSWindow, window == settingsWindow {
-            settingsWindow = nil
+        if let window = notification.object as? NSWindow {
+            if window == settingsWindow { settingsWindow = nil }
+            else if window == historyWindow { historyWindow = nil }
+            else if window == customWordsWindow { customWordsWindow = nil }
         }
     }
 

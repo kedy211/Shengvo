@@ -21,6 +21,9 @@
 		D24D55351033699BF4C60F48 /* HotKeyRecorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30EBEE64D57796F16BF390D /* HotKeyRecorderView.swift */; };
 		E0C200FED4F67E4AF8007F01 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F46DBC7BD8EC4D1264A4FCCF /* SetupView.swift */; };
 		F7829B241469BC9EF0E40A77 /* ASRResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B450C05C7FCDC0AB1E4B3DC3 /* ASRResponse.swift */; };
+		AA0000010000000100000001 /* HistoryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000010000000100000002 /* HistoryEntry.swift */; };
+		AA0000020000000100000001 /* HistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000100000002 /* HistoryManager.swift */; };
+		AA0000030000000100000001 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000030000000100000002 /* HistoryView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +38,9 @@
 		A1B2C3D4E5F60001AAAA0002 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A2D91B60F1DA742F411AF112 /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
 		A32BB963BE2685D5364B725F /* Shengvo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Shengvo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0000010000000100000002 /* HistoryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryEntry.swift; sourceTree = "<group>"; };
+		AA0000020000000100000002 /* HistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryManager.swift; sourceTree = "<group>"; };
+		AA0000030000000100000002 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		B450C05C7FCDC0AB1E4B3DC3 /* ASRResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASRResponse.swift; sourceTree = "<group>"; };
 		C0EE9D44E120CD956A9F73CD /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
 		D9567AA0F135D9ED87321B65 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -58,6 +64,7 @@
 				A1A4F8399970E678C4963379 /* ASRService.swift */,
 				A2D91B60F1DA742F411AF112 /* AudioRecorder.swift */,
 				041AE412D86B68FE9E00B959 /* ClipboardManager.swift */,
+				AA0000020000000100000002 /* HistoryManager.swift */,
 				953DE692FD81B33E8D4BE967 /* HotKeyManager.swift */,
 				181F9A661514C897A4AB3FE9 /* LLMService.swift */,
 			);
@@ -69,6 +76,7 @@
 			children = (
 				C0EE9D44E120CD956A9F73CD /* AppConfig.swift */,
 				B450C05C7FCDC0AB1E4B3DC3 /* ASRResponse.swift */,
+				AA0000010000000100000002 /* HistoryEntry.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -111,6 +119,7 @@
 				FCD3C419C34393D8DDE0AEAB /* RecordingOverlay.swift */,
 				8FEF819AFDA11F60CC33E395 /* SettingsView.swift */,
 				F46DBC7BD8EC4D1264A4FCCF /* SetupView.swift */,
+				AA0000030000000100000002 /* HistoryView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -198,6 +207,9 @@
 				8B4D3AA0FE299F863A386F00 /* AudioRecorder.swift in Sources */,
 				3BE652F2708DECC0E8F02269 /* ClipboardManager.swift in Sources */,
 				41E05F3AB4FFC88EC87A314E /* CustomWordsView.swift in Sources */,
+				AA0000010000000100000001 /* HistoryEntry.swift in Sources */,
+				AA0000020000000100000001 /* HistoryManager.swift in Sources */,
+				AA0000030000000100000001 /* HistoryView.swift in Sources */,
 				251F34FE0613D34095CC1A0C /* HotKeyManager.swift in Sources */,
 				D24D55351033699BF4C60F48 /* HotKeyRecorderView.swift in Sources */,
 				64A1E70A0AF4878EE3A5C674 /* LLMService.swift in Sources */,

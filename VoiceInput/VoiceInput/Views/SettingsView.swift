@@ -12,7 +12,6 @@ struct SettingsView: View {
             // Tab selector
             Picker("", selection: $selectedTab) {
                 Text("通用").tag("general")
-                Text("自定义识别词").tag("words")
                 Text("模型设置").tag("models")
             }
             .pickerStyle(.segmented)
@@ -25,8 +24,6 @@ struct SettingsView: View {
                 switch selectedTab {
                 case "general":
                     generalSettings
-                case "words":
-                    customWordsSettings
                 case "models":
                     modelSettings
                 default:
@@ -159,23 +156,7 @@ struct SettingsView: View {
         accessGranted = AXIsProcessTrustedWithOptions(options)
     }
 
-    // MARK: - Tab 2: Custom Words
-
-    private var customWordsSettings: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("自定义识别词")
-                .font(.title3)
-                .fontWeight(.medium)
-
-            Text("添加专有名词、术语等，提升语音识别准确率。")
-                .font(.caption)
-                .foregroundColor(.secondary)
-
-            CustomWordsView(customWords: $config.customWords)
-        }
-    }
-
-    // MARK: - Tab 3: Model Settings
+    // MARK: - Tab 2: Model Settings
 
     private var modelSettings: some View {
         VStack(alignment: .leading, spacing: 16) {
