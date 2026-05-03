@@ -3,11 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		251F34FE0613D34095CC1A0C /* HotKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953DE692FD81B33E8D4BE967 /* HotKeyManager.swift */; };
+		35DB58185865B5412231D490 /* HistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC6E6F2D5F7ED01CE9FF2B17 /* HistoryManager.swift */; };
 		3BE652F2708DECC0E8F02269 /* ClipboardManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 041AE412D86B68FE9E00B959 /* ClipboardManager.swift */; };
 		41E05F3AB4FFC88EC87A314E /* CustomWordsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4D251A1F8BE2E704507667 /* CustomWordsView.swift */; };
 		5B8D56432C67E1FD87DC02CB /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FEF819AFDA11F60CC33E395 /* SettingsView.swift */; };
@@ -16,15 +17,15 @@
 		8459FE87086708576E8B18A5 /* VoiceInputApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B708BAA8F982A05876C7CD1 /* VoiceInputApp.swift */; };
 		87898FB55B896D3361DCA63C /* ASRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A4F8399970E678C4963379 /* ASRService.swift */; };
 		8B4D3AA0FE299F863A386F00 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D91B60F1DA742F411AF112 /* AudioRecorder.swift */; };
-		A1B2C3D4E5F60001AAAA0001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60001AAAA0002 /* Assets.xcassets */; };
+		9E46E54F4B7EF8C39102D777 /* HistoryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80C91269A2DE8974D494D99C /* HistoryEntry.swift */; };
+		C6C0B6FA685ED1E462823CD0 /* SettingComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93A92FF31DB2B150A7F0EAD2 /* SettingComponents.swift */; };
+		CCBBC81E1927BE097A1F9673 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99BB47A3EB03FD8F02F9EAEB /* HistoryView.swift */; };
 		CFB1A2318DCC67CC59A75A4E /* RecordingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD3C419C34393D8DDE0AEAB /* RecordingOverlay.swift */; };
 		D24D55351033699BF4C60F48 /* HotKeyRecorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30EBEE64D57796F16BF390D /* HotKeyRecorderView.swift */; };
+		D5DCA0CC3880C465C172C2E9 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE0DD8551BA62066D51B2D0F /* SoundManager.swift */; };
+		D6C06341A9B45B4ABDEF883C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E3B8613233AE798AD0215C76 /* Assets.xcassets */; };
 		E0C200FED4F67E4AF8007F01 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F46DBC7BD8EC4D1264A4FCCF /* SetupView.swift */; };
 		F7829B241469BC9EF0E40A77 /* ASRResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B450C05C7FCDC0AB1E4B3DC3 /* ASRResponse.swift */; };
-		AA0000010000000100000001 /* HistoryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000010000000100000002 /* HistoryEntry.swift */; };
-		AA0000020000000100000001 /* HistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000100000002 /* HistoryManager.swift */; };
-		AA0000030000000100000001 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000030000000100000002 /* HistoryView.swift */; };
-		59E69F1F721A47998C8B82A2 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A023F513802A412AA572C4DE /* SoundManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,29 +34,30 @@
 		0D4D251A1F8BE2E704507667 /* CustomWordsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomWordsView.swift; sourceTree = "<group>"; };
 		181F9A661514C897A4AB3FE9 /* LLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMService.swift; sourceTree = "<group>"; };
 		4731E6D03EE739D36394D349 /* VoiceInput.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VoiceInput.entitlements; sourceTree = "<group>"; };
+		80C91269A2DE8974D494D99C /* HistoryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryEntry.swift; sourceTree = "<group>"; };
 		8FEF819AFDA11F60CC33E395 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		93A92FF31DB2B150A7F0EAD2 /* SettingComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingComponents.swift; sourceTree = "<group>"; };
 		953DE692FD81B33E8D4BE967 /* HotKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyManager.swift; sourceTree = "<group>"; };
+		99BB47A3EB03FD8F02F9EAEB /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		A1A4F8399970E678C4963379 /* ASRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASRService.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F60001AAAA0002 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A2D91B60F1DA742F411AF112 /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
-		A32BB963BE2685D5364B725F /* Shengvo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Shengvo.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		AA0000010000000100000002 /* HistoryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryEntry.swift; sourceTree = "<group>"; };
-		AA0000020000000100000002 /* HistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryManager.swift; sourceTree = "<group>"; };
-		AA0000030000000100000002 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		A32BB963BE2685D5364B725F /* VoiceInput.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VoiceInput.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B450C05C7FCDC0AB1E4B3DC3 /* ASRResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASRResponse.swift; sourceTree = "<group>"; };
+		BE0DD8551BA62066D51B2D0F /* SoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundManager.swift; sourceTree = "<group>"; };
 		C0EE9D44E120CD956A9F73CD /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
 		D9567AA0F135D9ED87321B65 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		E3B8613233AE798AD0215C76 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F30EBEE64D57796F16BF390D /* HotKeyRecorderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyRecorderView.swift; sourceTree = "<group>"; };
 		F46DBC7BD8EC4D1264A4FCCF /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
+		FC6E6F2D5F7ED01CE9FF2B17 /* HistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryManager.swift; sourceTree = "<group>"; };
 		FCD3C419C34393D8DDE0AEAB /* RecordingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingOverlay.swift; sourceTree = "<group>"; };
-		A023F513802A412AA572C4DE /* SoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		0CA790D9EF8AE7E9E8A5D717 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A32BB963BE2685D5364B725F /* Shengvo.app */,
+				A32BB963BE2685D5364B725F /* VoiceInput.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -66,10 +68,10 @@
 				A1A4F8399970E678C4963379 /* ASRService.swift */,
 				A2D91B60F1DA742F411AF112 /* AudioRecorder.swift */,
 				041AE412D86B68FE9E00B959 /* ClipboardManager.swift */,
-				AA0000020000000100000002 /* HistoryManager.swift */,
+				FC6E6F2D5F7ED01CE9FF2B17 /* HistoryManager.swift */,
 				953DE692FD81B33E8D4BE967 /* HotKeyManager.swift */,
 				181F9A661514C897A4AB3FE9 /* LLMService.swift */,
-				A023F513802A412AA572C4DE /* SoundManager.swift */,
+				BE0DD8551BA62066D51B2D0F /* SoundManager.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -79,7 +81,7 @@
 			children = (
 				C0EE9D44E120CD956A9F73CD /* AppConfig.swift */,
 				B450C05C7FCDC0AB1E4B3DC3 /* ASRResponse.swift */,
-				AA0000010000000100000002 /* HistoryEntry.swift */,
+				80C91269A2DE8974D494D99C /* HistoryEntry.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -118,11 +120,12 @@
 			isa = PBXGroup;
 			children = (
 				0D4D251A1F8BE2E704507667 /* CustomWordsView.swift */,
+				99BB47A3EB03FD8F02F9EAEB /* HistoryView.swift */,
 				F30EBEE64D57796F16BF390D /* HotKeyRecorderView.swift */,
 				FCD3C419C34393D8DDE0AEAB /* RecordingOverlay.swift */,
+				93A92FF31DB2B150A7F0EAD2 /* SettingComponents.swift */,
 				8FEF819AFDA11F60CC33E395 /* SettingsView.swift */,
 				F46DBC7BD8EC4D1264A4FCCF /* SetupView.swift */,
-				AA0000030000000100000002 /* HistoryView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -130,7 +133,7 @@
 		FB5B78FBFF91669B9A542B02 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				A1B2C3D4E5F60001AAAA0002 /* Assets.xcassets */,
+				E3B8613233AE798AD0215C76 /* Assets.xcassets */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -143,7 +146,7 @@
 			buildConfigurationList = F6BA6B0A361EA6C3A5FA240D /* Build configuration list for PBXNativeTarget "VoiceInput" */;
 			buildPhases = (
 				C35B10D48E421FB038B7EA39 /* Sources */,
-				A1B2C3D4E5F60001AAAA0003 /* Resources */,
+				F6DFAFF396317BC727C8F51C /* Resources */,
 			);
 			buildRules = (
 			);
@@ -153,7 +156,7 @@
 			packageProductDependencies = (
 			);
 			productName = VoiceInput;
-			productReference = A32BB963BE2685D5364B725F /* Shengvo.app */;
+			productReference = A32BB963BE2685D5364B725F /* VoiceInput.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -166,7 +169,7 @@
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					48ACF5FA6ECBC71A34114E9A = {
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 					};
 				};
 			};
@@ -180,6 +183,7 @@
 			);
 			mainGroup = 8C2266E69DB8D72668BA6F67;
 			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -189,11 +193,11 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		A1B2C3D4E5F60001AAAA0003 /* Resources */ = {
+		F6DFAFF396317BC727C8F51C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A1B2C3D4E5F60001AAAA0001 /* Assets.xcassets in Resources */,
+				D6C06341A9B45B4ABDEF883C /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -204,22 +208,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				59E69F1F721A47998C8B82A2 /* SoundManager.swift in Sources */,
 				F7829B241469BC9EF0E40A77 /* ASRResponse.swift in Sources */,
 				87898FB55B896D3361DCA63C /* ASRService.swift in Sources */,
 				80845358B93321BFA6EB04A9 /* AppConfig.swift in Sources */,
 				8B4D3AA0FE299F863A386F00 /* AudioRecorder.swift in Sources */,
 				3BE652F2708DECC0E8F02269 /* ClipboardManager.swift in Sources */,
 				41E05F3AB4FFC88EC87A314E /* CustomWordsView.swift in Sources */,
-				AA0000010000000100000001 /* HistoryEntry.swift in Sources */,
-				AA0000020000000100000001 /* HistoryManager.swift in Sources */,
-				AA0000030000000100000001 /* HistoryView.swift in Sources */,
+				9E46E54F4B7EF8C39102D777 /* HistoryEntry.swift in Sources */,
+				35DB58185865B5412231D490 /* HistoryManager.swift in Sources */,
+				CCBBC81E1927BE097A1F9673 /* HistoryView.swift in Sources */,
 				251F34FE0613D34095CC1A0C /* HotKeyManager.swift in Sources */,
 				D24D55351033699BF4C60F48 /* HotKeyRecorderView.swift in Sources */,
 				64A1E70A0AF4878EE3A5C674 /* LLMService.swift in Sources */,
 				CFB1A2318DCC67CC59A75A4E /* RecordingOverlay.swift in Sources */,
+				C6C0B6FA685ED1E462823CD0 /* SettingComponents.swift in Sources */,
 				5B8D56432C67E1FD87DC02CB /* SettingsView.swift in Sources */,
 				E0C200FED4F67E4AF8007F01 /* SetupView.swift in Sources */,
+				D5DCA0CC3880C465C172C2E9 /* SoundManager.swift in Sources */,
 				8459FE87086708576E8B18A5 /* VoiceInputApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -232,17 +237,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = VoiceInput/VoiceInput.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = CW5GP6RGQJ;
-				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = VoiceInput/App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.shengvo.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.voiceinput.app;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -375,17 +379,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = VoiceInput/VoiceInput.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = CW5GP6RGQJ;
-				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = VoiceInput/App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.shengvo.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.voiceinput.app;
 				SDKROOT = macosx;
 			};
 			name = Debug;

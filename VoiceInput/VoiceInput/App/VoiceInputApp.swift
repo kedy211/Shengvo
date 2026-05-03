@@ -27,8 +27,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var isProcessing = false
     private var settingsWindow: NSWindow?
     private var setupWindow: NSWindow?
-    private var historyWindow: NSWindow?
-    private var customWordsWindow: NSWindow?
     private var levelTimer: Timer?
     private var processStartTime: CFAbsoluteTime = 0
     private var recordingStartTime: CFAbsoluteTime = 0
@@ -57,13 +55,41 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     // MARK: - Status Bar
 
+    private func statusBarIcon() -> NSImage? {
+        if let icon = NSImage(named: "AppIcon") {
+            return icon
+        }
+        if let icon = NSApp.applicationIconImage {
+            return icon
+        }
+        if let url = Bundle.main.url(forResource: "AppIcon", withExtension: "icns"),
+           let icon = NSImage(contentsOf: url) {
+            return icon
+        }
+        return NSImage(named: NSImage.applicationIconName)
+    }
+
+    private func roundedStatusBarIcon(asTemplate: Bool = false) -> NSImage? {
+        guard let source = statusBarIcon() else { return nil }
+
+        let size = NSSize(width: 18, height: 18)
+        let radius: CGFloat = 4.0
+
+        let image = NSImage(size: size, flipped: false) { rect in
+            let path = NSBezierPath(roundedRect: rect, xRadius: radius, yRadius: radius)
+            path.addClip()
+            source.draw(in: rect, from: .zero, operation: .sourceOver, fraction: 1.0)
+            return true
+        }
+        image.isTemplate = asTemplate
+        return image
+    }
+
     private func setupStatusBar() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
 
         if let button = statusItem.button {
-            let icon = NSImage(named: NSImage.applicationIconName)
-            icon?.size = NSSize(width: 18, height: 18)
-            button.image = icon
+            button.image = roundedStatusBarIcon()
         }
 
         menu = NSMenu()
@@ -83,18 +109,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         DispatchQueue.main.async {
             guard let button = self.statusItem.button else { return }
 
-            let icon = NSImage(named: NSImage.applicationIconName)
-            icon?.size = NSSize(width: 18, height: 18)
-
             switch state {
             case .idle:
-                button.image = icon
+                button.image = self.roundedStatusBarIcon()
                 button.contentTintColor = nil
             case .recording:
-                button.image = icon
+                button.image = self.roundedStatusBarIcon(asTemplate: true)
                 button.contentTintColor = .systemRed
             case .processing:
-                button.image = icon
+                button.image = self.roundedStatusBarIcon(asTemplate: true)
                 button.contentTintColor = .systemYellow
             }
         }
@@ -388,47 +411,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     // MARK: - Settings
 
     @objc private func openCustomWords() {
-        if let window = customWordsWindow, window.isVisible {
-            window.makeKeyAndOrderFront(nil)
-            NSApp.activate(ignoringOtherApps: true)
-            return
-        }
-
-        let view = CustomWordsView(customWords: .constant(AppConfig.shared.customWords))
-        let hostingController = NSHostingController(rootView: view)
-        let window = NSWindow(contentViewController: hostingController)
-        window.title = "晟语 自定义识别词"
-        window.styleMask = [.titled, .closable, .miniaturizable]
-        window.isReleasedWhenClosed = false
-        window.center()
-        window.setContentSize(NSSize(width: 400, height: 450))
-        window.delegate = self
-
-        customWordsWindow = window
-        window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
+        SettingsView.pendingTab = .customWords
+        NotificationCenter.default.post(name: .switchSettingsTab, object: SettingsTab.customWords)
+        openSettings()
     }
 
     @objc private func openHistory() {
-        if let window = historyWindow, window.isVisible {
-            window.makeKeyAndOrderFront(nil)
-            NSApp.activate(ignoringOtherApps: true)
-            return
-        }
-
-        let view = HistoryView()
-        let hostingController = NSHostingController(rootView: view)
-        let window = NSWindow(contentViewController: hostingController)
-        window.title = "晟语 历史记录"
-        window.styleMask = [.titled, .closable, .miniaturizable]
-        window.isReleasedWhenClosed = false
-        window.center()
-        window.setContentSize(NSSize(width: 550, height: 500))
-        window.delegate = self
-
-        historyWindow = window
-        window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
+        SettingsView.pendingTab = .history
+        NotificationCenter.default.post(name: .switchSettingsTab, object: SettingsTab.history)
+        openSettings()
     }
 
     @objc private func openSettings() {
@@ -445,7 +436,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         window.styleMask = [.titled, .closable, .miniaturizable]
         window.isReleasedWhenClosed = false
         window.center()
-        window.setContentSize(NSSize(width: 550, height: 600))
+        window.setContentSize(NSSize(width: 620, height: 560))
         window.delegate = self
 
         settingsWindow = window
@@ -506,8 +497,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
         if let window = notification.object as? NSWindow {
             if window == settingsWindow { settingsWindow = nil }
-            else if window == historyWindow { historyWindow = nil }
-            else if window == customWordsWindow { customWordsWindow = nil }
         }
     }
 

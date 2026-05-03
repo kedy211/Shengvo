@@ -20,10 +20,6 @@ targets:
     platform: macOS
     sources:
       - path: VoiceInput
-        excludes:
-          - "**/*.xcassets"
-    resources:
-      - path: VoiceInput/Resources/Assets.xcassets
     info:
       path: VoiceInput/App/Info.plist
       properties:
