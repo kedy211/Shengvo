@@ -86,13 +86,12 @@ struct OverlayContentView: View {
     var body: some View {
         HStack(spacing: 10) {
             if viewModel.state == .recording {
-                Image(systemName: "mic.fill")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.red)
+                Image("inputicon")
+                    .resizable()
+                    .frame(width: 18, height: 18)
 
                 WaveView(level: viewModel.audioLevel, phase: wavePhase)
                     .frame(width: 70, height: 24)
-
             } else if viewModel.state == .processing {
                 ProgressView()
                     .progressViewStyle(.circular)
@@ -104,6 +103,7 @@ struct OverlayContentView: View {
                     .foregroundColor(.white)
             }
         }
+        .frame(minHeight: 24, maxHeight: 24)
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .background(.ultraThinMaterial)

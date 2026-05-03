@@ -61,7 +61,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
 
         if let button = statusItem.button {
-            let icon = NSImage(named: "AppIcon")
+            let icon = NSImage(named: NSImage.applicationIconName)
             icon?.size = NSSize(width: 18, height: 18)
             button.image = icon
         }
@@ -83,7 +83,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         DispatchQueue.main.async {
             guard let button = self.statusItem.button else { return }
 
-            let icon = NSImage(named: "AppIcon")
+            let icon = NSImage(named: NSImage.applicationIconName)
             icon?.size = NSSize(width: 18, height: 18)
 
             switch state {
@@ -147,6 +147,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         updateStatusIcon(state: .recording)
         updateMenuStatus("录音中...")
+        SoundManager.shared.playStartRecording()
         audioRecorder.startRecording()
         overlay.showRecording()
         startLevelTimer()
@@ -157,6 +158,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         stopESC_monitor()
         updateStatusIcon(state: .processing)
         updateMenuStatus("处理中...")
+        SoundManager.shared.playStopRecording()
         isProcessing = true
         stopLevelTimer()
         overlay.showProcessing()

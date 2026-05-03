@@ -24,6 +24,7 @@
 		AA0000010000000100000001 /* HistoryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000010000000100000002 /* HistoryEntry.swift */; };
 		AA0000020000000100000001 /* HistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000100000002 /* HistoryManager.swift */; };
 		AA0000030000000100000001 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000030000000100000002 /* HistoryView.swift */; };
+		59E69F1F721A47998C8B82A2 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A023F513802A412AA572C4DE /* SoundManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +48,7 @@
 		F30EBEE64D57796F16BF390D /* HotKeyRecorderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyRecorderView.swift; sourceTree = "<group>"; };
 		F46DBC7BD8EC4D1264A4FCCF /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		FCD3C419C34393D8DDE0AEAB /* RecordingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingOverlay.swift; sourceTree = "<group>"; };
+		A023F513802A412AA572C4DE /* SoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -67,6 +69,7 @@
 				AA0000020000000100000002 /* HistoryManager.swift */,
 				953DE692FD81B33E8D4BE967 /* HotKeyManager.swift */,
 				181F9A661514C897A4AB3FE9 /* LLMService.swift */,
+				A023F513802A412AA572C4DE /* SoundManager.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -201,6 +204,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				59E69F1F721A47998C8B82A2 /* SoundManager.swift in Sources */,
 				F7829B241469BC9EF0E40A77 /* ASRResponse.swift in Sources */,
 				87898FB55B896D3361DCA63C /* ASRService.swift in Sources */,
 				80845358B93321BFA6EB04A9 /* AppConfig.swift in Sources */,

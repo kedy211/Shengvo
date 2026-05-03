@@ -1,0 +1,20 @@
+{
+  "images" : [
+    {
+      "filename" : "inputicon_18.png",
+      "idiom" : "mac",
+      "scale" : "1x",
+      "size" : "18x18"
+    },
+    {
+      "filename" : "inputicon_36.png",
+      "idiom" : "mac",
+      "scale" : "2x",
+      "size" : "18x18"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
