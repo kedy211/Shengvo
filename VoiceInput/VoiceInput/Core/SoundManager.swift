@@ -7,7 +7,7 @@ final class SoundManager {
     private let stopSound: NSSound?
 
     private init() {
-        startSound = NSSound(named: "Pop")
+        startSound = NSSound(named: "Tink")
         stopSound = NSSound(named: "Tink")
     }
 

@@ -34,27 +34,18 @@ private func fnEventTapCallback(
     let managerID = userInfo.load(as: UInt32.self)
     guard let manager = fnEventTapManagers[managerID] else { return Unmanaged.passUnretained(event) }
 
+    if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+        DispatchQueue.main.async {
+            manager.reenableEventTap()
+        }
+        return Unmanaged.passUnretained(event)
+    }
+
     if type == .flagsChanged {
-        let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
         let flags = event.flags
 
-        // Update fn state: detect by both keycode and flag
-        if keyCode == 0x3F {
-            let fnActive = flags.contains(.maskSecondaryFn)
-            DispatchQueue.main.async {
-                manager.updateFnState(fnActive)
-            }
-        }
-        // Also detect fn from .function flag on any event
-        if flags.contains(.maskSecondaryFn) {
-            DispatchQueue.main.async {
-                manager.updateFnState(true)
-            }
-        }
-
         // For modifier-only combos (keyCode==0): check if fn + target modifiers are held
-        if manager.targetKeyCode == 0 {
-            let fnActive = manager.isFnPressed || flags.contains(.maskSecondaryFn)
+        if manager.targetKeyCode == 0 && flags.contains(.maskSecondaryFn) {
             let hasCtrl = flags.contains(.maskControl)
             let hasShift = flags.contains(.maskShift)
             let hasCmd = flags.contains(.maskCommand)
@@ -66,7 +57,7 @@ private func fnEventTapCallback(
             if hasCtrl { currentModifiers |= UInt32(controlKey) }
             if hasOption { currentModifiers |= UInt32(optionKey) }
 
-            if fnActive && currentModifiers == manager.targetModifiers {
+            if currentModifiers == manager.targetModifiers {
                 DispatchQueue.main.async {
                     manager.onFnHotKey?(0, manager.targetModifiers)
                 }
@@ -82,9 +73,7 @@ private func fnEventTapCallback(
         if flags.contains(.maskControl) { modifiers |= UInt32(controlKey) }
         if flags.contains(.maskAlternate) { modifiers |= UInt32(optionKey) }
 
-        let fnActive = manager.isFnPressed || flags.contains(.maskSecondaryFn)
-
-        if fnActive && UInt32(keyCode) == manager.targetKeyCode && modifiers == manager.targetModifiers {
+        if flags.contains(.maskSecondaryFn) && UInt32(keyCode) == manager.targetKeyCode && modifiers == manager.targetModifiers {
             DispatchQueue.main.async {
                 manager.onFnHotKey?(UInt32(keyCode), modifiers)
             }
@@ -111,15 +100,9 @@ class HotKeyManager {
     private let managerID: UInt32
     private var userDataPointer: UnsafeMutableRawPointer?
 
-    // fn key state tracking
-    private var fnPressed: Bool = false
-    private var fnReleaseWorkItem: DispatchWorkItem?
-
     // Target combo for CGEvent tap matching
     var targetKeyCode: UInt32 = 0
     var targetModifiers: UInt32 = 0
-
-    var isFnPressed: Bool { return fnPressed }
 
     init() {
         managerID = nextManagerID
@@ -156,7 +139,7 @@ class HotKeyManager {
             currentModifiers,
             hotKeyID,
             GetEventMonitorTarget(),
-            0,
+            UInt32(kEventHotKeyExclusive),
             &hotKeyRef
         )
 
@@ -223,20 +206,15 @@ class HotKeyManager {
         }
     }
 
-    func updateFnState(_ pressed: Bool) {
-        fnPressed = pressed
+    func unregisterAll() {
+        unregisterHotKey()
+        stopFnEventTap()
+    }
 
-        // Cancel any pending release work item
-        fnReleaseWorkItem?.cancel()
-
-        if !pressed {
-            // Small delay before considering fn truly released
-            // This allows detecting fn+key combos where fn is released slightly before the key
-            let workItem = DispatchWorkItem { [weak self] in
-                self?.fnPressed = false
-            }
-            fnReleaseWorkItem = workItem
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05, execute: workItem)
+    func reenableEventTap() {
+        if let tap = eventTap {
+            print("[HotKey] Event tap disabled, re-enabling")
+            CGEvent.tapEnable(tap: tap, enable: true)
         }
     }
 

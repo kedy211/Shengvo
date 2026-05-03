@@ -484,9 +484,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     @objc private func handleSettingsChange() {
         let config = AppConfig.shared
 
-        // Stop both mechanisms
-        hotKeyManager.unregisterHotKey()
-        hotKeyManager.stopFnEventTap()
+        hotKeyManager.unregisterAll()
 
         if config.hotKeyUsesFn {
             hotKeyManager.startFnEventTap(
@@ -516,8 +514,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     // MARK: - Quit
 
     @objc private func quitApp() {
-        hotKeyManager?.unregisterHotKey()
-        hotKeyManager?.stopFnEventTap()
+        hotKeyManager?.unregisterAll()
         NSApplication.shared.terminate(nil)
     }
 }

@@ -44,7 +44,7 @@ class RecordingOverlay {
         window.level = .floating
         window.isOpaque = false
         window.backgroundColor = .clear
-        window.hasShadow = true
+        window.hasShadow = false
         window.collectionBehavior = [.canJoinAllSpaces, .stationary]
         window.isMovableByWindowBackground = false
 
@@ -89,6 +89,7 @@ struct OverlayContentView: View {
                 Image("inputicon")
                     .resizable()
                     .frame(width: 18, height: 18)
+                    .clipShape(RoundedRectangle(cornerRadius: 5))
 
                 WaveView(level: viewModel.audioLevel, phase: wavePhase)
                     .frame(width: 70, height: 24)
