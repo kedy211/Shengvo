@@ -48,13 +48,34 @@ class RecordingOverlay {
         window.collectionBehavior = [.canJoinAllSpaces, .stationary]
         window.isMovableByWindowBackground = false
 
-        // Position at bottom center of screen
+        // Position at cursor location
+        let mouseLocation = NSEvent.mouseLocation
+        let windowWidth: CGFloat = 160
+        let windowHeight: CGFloat = 44
+        let xOffset: CGFloat = 20
+        let yOffset: CGFloat = 16
+
+        var x = mouseLocation.x + xOffset
+        var y = mouseLocation.y + yOffset
+
+        // Clamp to visible screen area
         if let screen = NSScreen.main {
             let screenFrame = screen.visibleFrame
-            let x = screenFrame.midX - 80
-            let y = screenFrame.minY + 40
-            window.setFrameOrigin(NSPoint(x: x, y: y))
+            if x + windowWidth > screenFrame.maxX {
+                x = mouseLocation.x - xOffset - windowWidth
+            }
+            if y + windowHeight > screenFrame.maxY {
+                y = mouseLocation.y - yOffset - windowHeight
+            }
+            if x < screenFrame.minX {
+                x = screenFrame.minX
+            }
+            if y < screenFrame.minY {
+                y = screenFrame.minY
+            }
         }
+
+        window.setFrameOrigin(NSPoint(x: x, y: y))
 
         window.orderFront(nil)
         self.window = window

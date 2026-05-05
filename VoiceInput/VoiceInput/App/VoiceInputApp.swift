@@ -108,18 +108,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private func updateStatusIcon(state: RecordingState) {
         DispatchQueue.main.async {
             guard let button = self.statusItem.button else { return }
-
-            switch state {
-            case .idle:
-                button.image = self.roundedStatusBarIcon()
-                button.contentTintColor = nil
-            case .recording:
-                button.image = self.roundedStatusBarIcon(asTemplate: true)
-                button.contentTintColor = .systemRed
-            case .processing:
-                button.image = self.roundedStatusBarIcon(asTemplate: true)
-                button.contentTintColor = .systemYellow
-            }
+            button.image = self.roundedStatusBarIcon()
+            button.contentTintColor = nil
         }
     }
 
