@@ -11,134 +11,134 @@ class ClipboardManager {
         return AXIsProcessTrustedWithOptions(options)
     }
 
-    // MARK: - Direct text injection (preferred)
+    // MARK: - Strategy A: Unicode CGEvent (no clipboard)
 
-    /// Attempt to inject text directly into the focused element via Accessibility API.
-    /// Returns true on success, false if clipboard fallback is needed.
-    func injectTextDirectly(_ text: String) -> Bool {
-        guard checkAccessibility() else {
-            print("[Input] Accessibility NOT granted, fallback to clipboard")
-            return false
+    func injectViaUnicodeEvent(_ text: String) -> Bool {
+        let source = CGEventSource(stateID: .privateState)
+        let utf16 = Array(text.utf16)
+        let chunkSize = 20
+
+        for offset in stride(from: 0, to: utf16.count, by: chunkSize) {
+            let chunk = Array(utf16[offset..<min(offset + chunkSize, utf16.count)])
+            guard let keyDown = CGEvent(keyboardEventSource: source, virtualKey: 0x31, keyDown: true),
+                  let keyUp = CGEvent(keyboardEventSource: source, virtualKey: 0x31, keyDown: false) else {
+                return false
+            }
+
+            chunk.withUnsafeBufferPointer { ptr in
+                keyDown.keyboardSetUnicodeString(stringLength: chunk.count, unicodeString: ptr.baseAddress)
+            }
+
+            keyDown.post(tap: .cghidEventTap)
+            usleep(5000)
+            keyUp.post(tap: .cghidEventTap)
+            usleep(5000)
         }
 
-        guard let app = NSWorkspace.shared.frontmostApplication else {
-            print("[Input] No frontmost application")
-            return false
-        }
-
-        let pid = app.processIdentifier
-        let appElement = AXUIElementCreateApplication(pid)
-
-        var focusedElement: CFTypeRef?
-        let result = AXUIElementCopyAttributeValue(appElement, kAXFocusedUIElementAttribute as CFString, &focusedElement)
-
-        guard result == .success, let element = focusedElement else {
-            print("[Input] Cannot get focused element (error: \(result.rawValue)), fallback to clipboard")
-            return false
-        }
-
-        let axElement = element as! AXUIElement
-
-        // Try kAXValueAttribute first (works for standard NSTextField, NSTextView, most native apps)
-        var setResult = AXUIElementSetAttributeValue(axElement, kAXValueAttribute as CFString, text as CFTypeRef)
-        if setResult == .success {
-            print("[Input] Direct text injection succeeded via kAXValueAttribute")
-            return true
-        }
-
-        // Try kAXSelectedTextAttribute (works for some editors when text is selected)
-        setResult = AXUIElementSetAttributeValue(axElement, kAXSelectedTextAttribute as CFString, text as CFTypeRef)
-        if setResult == .success {
-            print("[Input] Direct text injection succeeded via kAXSelectedTextAttribute")
-            return true
-        }
-
-        print("[Input] Direct injection failed (value: \(setResult.rawValue)), fallback to clipboard")
-        return false
+        print("[Input] Unicode events sent (\(text.count) chars)")
+        return true
     }
 
-    // MARK: - Clipboard-based fallback
+    // MARK: - Strategy B: Clipboard paste with restore
 
-    func pasteViaClipboard(text: String) {
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.setString(text, forType: .string)
-
+    func pasteViaClipboardWithRestore(text: String) {
         guard checkAccessibility() else {
-            print("[Input] Accessibility NOT granted - cannot paste")
-            DispatchQueue.main.async {
-                let alert = NSAlert()
-                alert.messageText = "无法粘贴"
-                alert.informativeText = "需要辅助功能权限才能自动粘贴。\n\n请在 系统偏好设置 → 隐私与安全性 → 辅助功能 中添加 晟语，然后重启应用。"
-                alert.alertStyle = .warning
-                alert.addButton(withTitle: "打开系统偏好设置")
-                alert.addButton(withTitle: "好的")
-                let response = alert.runModal()
-                if response == .alertFirstButtonReturn {
-                    NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
-                }
-            }
+            showAccessibilityAlert()
             return
         }
 
-        // Try osascript first, fallback to CGEvent
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-        process.arguments = ["-e", "tell application \"System Events\" to keystroke \"v\" using command down"]
-
-        let errorPipe = Pipe()
-        process.standardError = errorPipe
-
-        do {
-            try process.run()
-            process.waitUntilExit()
-
-            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
-            let errorStr = String(data: errorData, encoding: .utf8) ?? ""
-
-            if process.terminationStatus == 0 {
-                print("[Input] Clipboard paste succeeded via osascript")
-            } else {
-                print("[Input] osascript failed: \(errorStr)")
-                pasteViaCGEvent()
+        // Save current clipboard contents
+        let pasteboard = NSPasteboard.general
+        var savedItems: [NSPasteboardItem] = []
+        if let items = pasteboard.pasteboardItems {
+            for item in items {
+                let saved = NSPasteboardItem()
+                for type in item.types {
+                    if let data = item.data(forType: type) {
+                        saved.setData(data, forType: type)
+                    }
+                }
+                savedItems.append(saved)
             }
-        } catch {
-            print("[Input] osascript error: \(error)")
-            pasteViaCGEvent()
+        }
+        let savedChangeCount = pasteboard.changeCount
+
+        // Set our text
+        pasteboard.clearContents()
+        pasteboard.writeObjects([text as NSString])
+
+        // Send Cmd+V
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            let source = CGEventSource(stateID: .hidSystemState)
+
+            guard let cmdDn = CGEvent(keyboardEventSource: source, virtualKey: 0x37, keyDown: true),
+                  let vDn   = CGEvent(keyboardEventSource: source, virtualKey: 0x09, keyDown: true),
+                  let vUp   = CGEvent(keyboardEventSource: source, virtualKey: 0x09, keyDown: false),
+                  let cmdUp = CGEvent(keyboardEventSource: source, virtualKey: 0x37, keyDown: false) else {
+                return
+            }
+
+            cmdDn.post(tap: .cghidEventTap)
+            usleep(15000)
+
+            vDn.flags = .maskCommand
+            vDn.post(tap: .cghidEventTap)
+            usleep(30000)
+
+            vUp.flags = .maskCommand
+            vUp.post(tap: .cghidEventTap)
+            usleep(15000)
+
+            cmdUp.post(tap: .cghidEventTap)
+
+            print("[Input] Cmd+V sequence sent")
+
+            // Restore original clipboard after paste completes
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                if pasteboard.changeCount != savedChangeCount || !savedItems.isEmpty {
+                    pasteboard.clearContents()
+                    pasteboard.writeObjects(savedItems)
+                    print("[Input] Clipboard restored")
+                }
+            }
         }
     }
 
-    private func pasteViaCGEvent() {
-        let source = CGEventSource(stateID: .hidSystemState)
-        let keyDown = CGEvent(keyboardEventSource: source, virtualKey: 0x09, keyDown: true)
-        keyDown?.flags = .maskCommand
-        keyDown?.post(tap: .cgAnnotatedSessionEventTap)
+    // MARK: - Alert
 
-        let keyUp = CGEvent(keyboardEventSource: source, virtualKey: 0x09, keyDown: false)
-        keyUp?.flags = .maskCommand
-        keyUp?.post(tap: .cgAnnotatedSessionEventTap)
-        print("[Input] CGEvent paste sent")
+    private func showAccessibilityAlert() {
+        DispatchQueue.main.async {
+            let alert = NSAlert()
+            alert.messageText = "无法粘贴"
+            alert.informativeText = "需要辅助功能权限才能自动粘贴。\n\n请在 系统偏好设置 → 隐私与安全性 → 辅助功能 中添加 晟语，然后重启应用。"
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: "打开系统偏好设置")
+            alert.addButton(withTitle: "好的")
+            if alert.runModal() == .alertFirstButtonReturn {
+                NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
+            }
+        }
     }
 
     // MARK: - Convenience
 
-    /// Paste text: try direct AX injection first, fall back to clipboard Cmd+V.
+    /// Paste text:
+    /// 1. Unicode CGEvent — no clipboard, no pasteboard (preferred)
+    /// 2. Clipboard paste + restore original content (fallback)
     func pasteText(_ text: String) {
-        if injectTextDirectly(text) {
+        if injectViaUnicodeEvent(text) {
             return
         }
-        pasteViaClipboard(text: text)
+        pasteViaClipboardWithRestore(text: text)
     }
 
-    /// Just copy to clipboard (for manual user paste).
     func copyToClipboard(text: String) {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
-        pasteboard.setString(text, forType: .string)
-        print("[Input] Copied \(text.count) chars to clipboard")
+        pasteboard.writeObjects([text as NSString])
+        print("[Input] Copied to clipboard")
     }
 
-    /// Copy to clipboard then paste (for history panel paste).
     func copyAndPaste(text: String) {
         copyToClipboard(text: text)
         pasteText(text)

@@ -34,19 +34,22 @@ class RecordingOverlay {
         let hosting = NSHostingController(rootView: contentView)
         hosting.view.frame = NSRect(x: 0, y: 0, width: 128, height: 35)
 
-        let window = NSWindow(
+        let panel = NSPanel(
             contentRect: NSRect(x: 0, y: 0, width: 128, height: 35),
-            styleMask: [.borderless],
+            styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
         )
-        window.contentView = hosting.view
-        window.level = .floating
-        window.isOpaque = false
-        window.backgroundColor = .clear
-        window.hasShadow = false
-        window.collectionBehavior = [.canJoinAllSpaces, .stationary]
-        window.isMovableByWindowBackground = false
+        panel.contentView = hosting.view
+        panel.level = .floating
+        panel.isOpaque = false
+        panel.backgroundColor = .clear
+        panel.hasShadow = false
+        panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .transient, .ignoresCycle]
+        panel.isMovableByWindowBackground = false
+        panel.worksWhenModal = false
+        panel.hidesOnDeactivate = false
+        panel.becomesKeyOnlyIfNeeded = true
 
         // Position at bottom center of main display
         let windowWidth: CGFloat = 128
@@ -63,10 +66,10 @@ class RecordingOverlay {
             y = 40
         }
 
-        window.setFrameOrigin(NSPoint(x: x, y: y))
+        panel.setFrameOrigin(NSPoint(x: x, y: y))
 
-        window.orderFront(nil)
-        self.window = window
+        panel.orderFront(nil)
+        self.window = panel
         self.hostingView = hosting
     }
 }

@@ -159,7 +159,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func startRecording() {
         // Detect frontmost app
-        targetAppName = detectFrontmostApp()
+        if let app = NSWorkspace.shared.frontmostApplication {
+            targetAppName = app.localizedName ?? app.bundleIdentifier ?? "unknown"
+        } else {
+            targetAppName = nil
+        }
         recordingStartTime = CFAbsoluteTimeGetCurrent()
         print("[App] Target app: \(targetAppName ?? "unknown")")
 
@@ -263,16 +267,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         resetState()
     }
 
-    // MARK: - Frontmost App Detection
-
-    private func detectFrontmostApp() -> String? {
-        if let app = NSWorkspace.shared.frontmostApplication {
-            let appName = app.localizedName ?? app.bundleIdentifier ?? "unknown"
-            return appName
-        }
-        return nil
-    }
-
     // MARK: - Processing
 
     private func processAudio(_ audioData: Data) {
@@ -359,8 +353,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Reset state before paste (so recording can start again)
         resetState()
 
-        // Inject text directly via Accessibility API (fallback to clipboard)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+        // Inject text via Accessibility API; fallback to clipboard Cmd+V
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [self] in
             ClipboardManager.shared.pasteText(text)
             let pasteTime = CFAbsoluteTimeGetCurrent() - startTime
             print("[Timing] 粘贴完成: \(String(format: "%.2f", pasteTime))s")
@@ -376,6 +370,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         updateStatusIcon(state: .idle)
         updateMenuStatus("就绪")
         overlay.hide()
+    }
+
+    private func logFrontmost(_ tag: String) {
+        // Keep for future debugging
     }
 
     // MARK: - UI Helpers

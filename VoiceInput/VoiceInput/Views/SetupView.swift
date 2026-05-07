@@ -2,6 +2,7 @@ import SwiftUI
 import AVFoundation
 
 struct SetupView: View {
+    @ObservedObject private var modelManager = ModelManager.shared
     @State private var step: SetupStep = .welcome
     @State private var micGranted = false
     @State private var accessGranted = false
@@ -14,6 +15,8 @@ struct SetupView: View {
             switch step {
             case .welcome:
                 welcomeStep
+            case .modelDownload:
+                modelDownloadStep
             case .microphone:
                 microphoneStep
             case .accessibility:
@@ -22,7 +25,7 @@ struct SetupView: View {
                 doneStep
             }
         }
-        .frame(width: 420, height: 320)
+        .frame(width: 420, height: 340)
         .padding(32)
         .onAppear {
             checkExistingPermissions()
@@ -30,6 +33,110 @@ struct SetupView: View {
     }
 
     // MARK: - Steps
+
+    private var modelStepIcon: String {
+        switch modelManager.downloadState {
+        case .ready: return "checkmark.circle.fill"
+        case .failed: return "exclamationmark.triangle.fill"
+        case .downloading: return "arrow.down.circle.fill"
+        case .notStarted: return "arrow.down.circle"
+        }
+    }
+
+    private var modelStepColor: Color {
+        switch modelManager.downloadState {
+        case .ready: return .green
+        case .failed: return .orange
+        case .downloading: return .blue
+        case .notStarted: return .blue
+        }
+    }
+
+    private var modelDownloadStep: some View {
+        VStack(spacing: 20) {
+            Image(systemName: modelStepIcon)
+                .font(.system(size: 60))
+                .foregroundColor(modelStepColor)
+
+            Text("语音识别模型")
+                .font(.title2)
+                .fontWeight(.semibold)
+
+            if case .downloading = modelManager.downloadState {
+                Text("正在下载 Whisper 模型…")
+                    .foregroundColor(.secondary)
+                ProgressView()
+                    .scaleEffect(0.8)
+                Text("约 78MB，首次启动时自动缓存")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            } else if case .failed(let msg) = modelManager.downloadState {
+                Text("下载失败")
+                    .foregroundColor(.secondary)
+                Text(msg)
+                    .font(.caption)
+                    .foregroundColor(.red)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 280)
+            } else if modelManager.isModelReady {
+                Text("已就绪")
+                    .foregroundColor(.secondary)
+            } else {
+                Text("需要下载 Whisper 语音识别模型\n约 78MB，仅首次需要")
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.secondary)
+            }
+
+            if modelManager.isModelReady {
+                Button("下一步") {
+                    step = .microphone
+                }
+                .buttonStyle(.borderedProminent)
+            } else if case .downloading = modelManager.downloadState {
+                // 下载中不显示按钮
+                EmptyView()
+            } else if case .failed = modelManager.downloadState {
+                HStack(spacing: 12) {
+                    Button("重试") {
+                        downloadModel()
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                    Button("跳过") {
+                        step = .microphone
+                    }
+                    .foregroundColor(.secondary)
+                }
+            } else {
+                HStack(spacing: 12) {
+                    Button("下载模型") {
+                        downloadModel()
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                    Button("跳过") {
+                        step = .microphone
+                    }
+                    .foregroundColor(.secondary)
+                }
+            }
+        }
+        .onAppear {
+            if !modelManager.isModelReady {
+                modelManager.downloadState = .notStarted
+            }
+        }
+    }
+
+    private func downloadModel() {
+        Task {
+            do {
+                _ = try await modelManager.prepareModel()
+            } catch {
+                // 错误状态已由 ModelManager.downloadState 反映
+            }
+        }
+    }
 
     private var welcomeStep: some View {
         VStack(spacing: 20) {
@@ -41,12 +148,12 @@ struct SetupView: View {
                 .font(.title2)
                 .fontWeight(.semibold)
 
-            Text("开始前需要授予两个权限：\n1. 麦克风 — 录制语音\n2. 辅助功能 — 自动粘贴文字")
+            Text("开始前需要完成以下设置：\n1. 下载语音识别模型（约78MB）\n2. 麦克风权限 — 录制语音\n3. 辅助功能权限 — 自动粘贴文字")
                 .multilineTextAlignment(.center)
                 .foregroundColor(.secondary)
 
             Button("开始设置") {
-                step = .microphone
+                step = .modelDownload
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
@@ -188,6 +295,7 @@ struct SetupView: View {
 
 enum SetupStep {
     case welcome
+    case modelDownload
     case microphone
     case accessibility
     case done

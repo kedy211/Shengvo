@@ -22,7 +22,7 @@ class ASRService {
             guard let self = self else { return }
 
             do {
-                let context = try self.getWhisperContext()
+                let context = try await self.getWhisperContext()
                 let samples = ASRService.wavToFloatSamples(audioData)
                 guard !samples.isEmpty else {
                     await MainActor.run { completion(.failure(ASRError.emptyAudio)) }
@@ -41,13 +41,10 @@ class ASRService {
         }
     }
 
-    private func getWhisperContext() throws -> WhisperActor {
+    private func getWhisperContext() async throws -> WhisperActor {
         if let ctx = whisperContext { return ctx }
 
-        guard let modelPath = Bundle.main.path(forResource: "ggml-base-q8_0", ofType: "bin") else {
-            throw ASRError.modelNotFound
-        }
-
+        let modelPath = try await ModelManager.shared.prepareModel()
         let ctx = try WhisperActor.create(modelPath: modelPath)
         whisperContext = ctx
         return ctx

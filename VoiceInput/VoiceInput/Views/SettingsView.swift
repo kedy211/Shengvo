@@ -231,7 +231,7 @@ struct SettingsView: View {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundColor(.green)
                             .font(.system(size: 14))
-                        Text("Whisper base (q8_0 量化, ~95MB)")
+                        Text("Whisper base (q8_0 量化, 首次自动下载 ~78MB)")
                             .font(.system(size: 13, weight: .regular))
                         Spacer()
                     }
