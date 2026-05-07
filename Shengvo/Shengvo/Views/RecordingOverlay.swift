@@ -125,10 +125,10 @@ struct OverlayContentView: View {
                 VisualEffectView(material: .hudWindow, blendingMode: .withinWindow)
             }
         )
-        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .clipShape(RoundedRectangle(cornerRadius: 17))
         .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.white.opacity(0.1), lineWidth: 0.4)
+            RoundedRectangle(cornerRadius: 17)
+                .stroke(Color.white.opacity(0.4), lineWidth: 0.8)
         )
         .frame(width: 128, height: 35)
         .onReceive(timer) { _ in

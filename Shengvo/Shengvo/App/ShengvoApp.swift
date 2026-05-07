@@ -4,7 +4,7 @@ import AVFoundation
 import UserNotifications
 
 @main
-struct VoiceInputApp: App {
+struct ShengvoApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
@@ -247,7 +247,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 }
             }
         }
-        escMonitors = [localMonitor, globalMonitor]
+        escMonitors = [localMonitor, globalMonitor].compactMap { $0 }
         print("[App] ESC monitor started (local + global)")
     }
 
@@ -354,7 +354,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         resetState()
 
         // Inject text via Accessibility API; fallback to clipboard Cmd+V
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
             ClipboardManager.shared.pasteText(text)
             let pasteTime = CFAbsoluteTimeGetCurrent() - startTime
             print("[Timing] 粘贴完成: \(String(format: "%.2f", pasteTime))s")
@@ -422,13 +422,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
 
         let settingsView = SettingsView()
-        let hostingController = NSHostingController(rootView: settingsView)
-        let window = NSWindow(contentViewController: hostingController)
+        let hostingView = NSHostingView(rootView: settingsView)
+        hostingView.frame = NSRect(x: 0, y: 0, width: 620, height: 560)
+
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 620, height: 560),
+            styleMask: [.titled, .closable, .miniaturizable],
+            backing: .buffered,
+            defer: false
+        )
+        window.contentView = hostingView
         window.title = "晟语 设置"
-        window.styleMask = [.titled, .closable, .miniaturizable]
         window.isReleasedWhenClosed = false
         window.center()
-        window.setContentSize(NSSize(width: 620, height: 560))
         window.delegate = self
 
         settingsWindow = window

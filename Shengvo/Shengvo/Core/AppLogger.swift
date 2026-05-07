@@ -6,7 +6,7 @@ class AppLogger {
     private let logDirectory: URL
     private let dateFormatter: DateFormatter
     private let isoFormatter: ISO8601DateFormatter
-    private let queue = DispatchQueue(label: "com.voiceinput.logger", qos: .utility)
+    private let queue = DispatchQueue(label: "com.shengvo.logger", qos: .utility)
 
     private init() {
         let home = FileManager.default.homeDirectoryForCurrentUser
@@ -47,9 +47,9 @@ class AppLogger {
                let jsonLine = String(data: jsonData, encoding: .utf8) {
                 let line = jsonLine + "\n"
                 if let handle = try? FileHandle(forWritingTo: fileURL) {
-                    try? handle.seekToEnd()
-                    try? handle.write(contentsOf: Data(line.utf8))
-                    try? handle.close()
+                    _ = try? handle.seekToEnd()
+                    _ = try? handle.write(contentsOf: Data(line.utf8))
+                    _ = try? handle.close()
                 } else {
                     try? line.data(using: .utf8)?.write(to: fileURL)
                 }

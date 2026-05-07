@@ -48,7 +48,6 @@ struct SettingsView: View {
         } detail: {
             detailContent
         }
-        .frame(width: 620, height: 560)
         .onAppear {
             refreshPermissions()
             refreshHistory()

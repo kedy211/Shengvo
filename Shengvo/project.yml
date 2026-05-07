@@ -1,6 +1,6 @@
-name: VoiceInput
+name: Shengvo
 options:
-  bundleIdPrefix: com.voiceinput
+  bundleIdPrefix: com.shengvo
   deploymentTarget:
     macOS: "13.0"
   xcodeVersion: "15.0"
@@ -15,25 +15,25 @@ settings:
     CURRENT_PROJECT_VERSION: "1"
 
 targets:
-  VoiceInput:
+  Shengvo:
     type: application
     platform: macOS
     sources:
-      - path: VoiceInput
+      - path: Shengvo
     info:
-      path: VoiceInput/App/Info.plist
+      path: Shengvo/App/Info.plist
       properties:
         LSUIElement: true
         NSMicrophoneUsageDescription: 晟语需要访问麦克风以录制语音进行识别。
     entitlements:
-      path: VoiceInput/VoiceInput.entitlements
+      path: Shengvo/Shengvo.entitlements
       properties:
         com.apple.security.app-sandbox: false
         com.apple.security.device.audio-input: true
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.voiceinput.app
-        INFOPLIST_FILE: VoiceInput/App/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.shengvo.app
+        INFOPLIST_FILE: Shengvo/App/Info.plist
         CODE_SIGN_IDENTITY: "-"
         CODE_SIGN_STYLE: Manual
         ENABLE_HARDENED_RUNTIME: false

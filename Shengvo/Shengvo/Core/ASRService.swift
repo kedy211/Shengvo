@@ -101,7 +101,7 @@ class ASRService {
         }
 
         let requestBody: [String: Any] = [
-            "user": ["uid": "voice_input"],
+            "user": ["uid": "shengvo"],
             "audio": ["data": base64Audio],
             "request": requestDict
         ]

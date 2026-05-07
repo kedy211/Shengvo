@@ -15,7 +15,7 @@
 		5B8D56432C67E1FD87DC02CB /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FEF819AFDA11F60CC33E395 /* SettingsView.swift */; };
 		64A1E70A0AF4878EE3A5C674 /* LLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181F9A661514C897A4AB3FE9 /* LLMService.swift */; };
 		80845358B93321BFA6EB04A9 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0EE9D44E120CD956A9F73CD /* AppConfig.swift */; };
-		8459FE87086708576E8B18A5 /* VoiceInputApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B708BAA8F982A05876C7CD1 /* VoiceInputApp.swift */; };
+		8459FE87086708576E8B18A5 /* ShengvoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B708BAA8F982A05876C7CD1 /* ShengvoApp.swift */; };
 		87898FB55B896D3361DCA63C /* ASRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A4F8399970E678C4963379 /* ASRService.swift */; };
 		8B4D3AA0FE299F863A386F00 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D91B60F1DA742F411AF112 /* AudioRecorder.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C2 /* ModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D6E7F8A9B0C1D2 /* ModelManager.swift */; };
@@ -48,20 +48,20 @@
 
 /* Begin PBXFileReference section */
 		041AE412D86B68FE9E00B959 /* ClipboardManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardManager.swift; sourceTree = "<group>"; };
-		0B708BAA8F982A05876C7CD1 /* VoiceInputApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceInputApp.swift; sourceTree = "<group>"; };
+		0B708BAA8F982A05876C7CD1 /* ShengvoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShengvoApp.swift; sourceTree = "<group>"; };
 		0D4D251A1F8BE2E704507667 /* CustomWordsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomWordsView.swift; sourceTree = "<group>"; };
 		181F9A661514C897A4AB3FE9 /* LLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMService.swift; sourceTree = "<group>"; };
-		4731E6D03EE739D36394D349 /* VoiceInput.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VoiceInput.entitlements; sourceTree = "<group>"; };
+		4731E6D03EE739D36394D349 /* Shengvo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Shengvo.entitlements; sourceTree = "<group>"; };
 		E1F2A3B4C5D6E7F8A9B0C1D2 /* ModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManager.swift; sourceTree = "<group>"; };
 		80C91269A2DE8974D494D99C /* HistoryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryEntry.swift; sourceTree = "<group>"; };
 		8FEF819AFDA11F60CC33E395 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		93A92FF31DB2B150A7F0EAD2 /* SettingComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingComponents.swift; sourceTree = "<group>"; };
 		953DE692FD81B33E8D4BE967 /* HotKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyManager.swift; sourceTree = "<group>"; };
 		99BB47A3EB03FD8F02F9EAEB /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
-		9E5DD7DD102A3E45C57BA198 /* whisper.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = wrapper.xcframework; path = VoiceInput/whisper.xcframework; sourceTree = SOURCE_ROOT; };
+		9E5DD7DD102A3E45C57BA198 /* whisper.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = wrapper.xcframework; path = Shengvo/whisper.xcframework; sourceTree = SOURCE_ROOT; };
 		A1A4F8399970E678C4963379 /* ASRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASRService.swift; sourceTree = "<group>"; };
 		A2D91B60F1DA742F411AF112 /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
-		A32BB963BE2685D5364B725F /* VoiceInput.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VoiceInput.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A32BB963BE2685D5364B725F /* Shengvo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Shengvo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B29DC30B3CC02B96B73A64C7 /* AppLogger.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
 		B450C05C7FCDC0AB1E4B3DC3 /* ASRResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASRResponse.swift; sourceTree = "<group>"; };
 		BE0DD8551BA62066D51B2D0F /* SoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundManager.swift; sourceTree = "<group>"; };
@@ -89,7 +89,7 @@
 		0CA790D9EF8AE7E9E8A5D717 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A32BB963BE2685D5364B725F /* VoiceInput.app */,
+				A32BB963BE2685D5364B725F /* Shengvo.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -124,29 +124,29 @@
 		8C2266E69DB8D72668BA6F67 = {
 			isa = PBXGroup;
 			children = (
-				C88C74908E57FBA0507E65F0 /* VoiceInput */,
+				C88C74908E57FBA0507E65F0 /* Shengvo */,
 				0CA790D9EF8AE7E9E8A5D717 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		C88C74908E57FBA0507E65F0 /* VoiceInput */ = {
+		C88C74908E57FBA0507E65F0 /* Shengvo */ = {
 			isa = PBXGroup;
 			children = (
-				4731E6D03EE739D36394D349 /* VoiceInput.entitlements */,
+				4731E6D03EE739D36394D349 /* Shengvo.entitlements */,
 				CF9313599A063614C1887613 /* App */,
 				404137515C3889A29CD8CAA7 /* Core */,
 				7CEDB23FE7281B946F2AA0A0 /* Models */,
 				FB5B78FBFF91669B9A542B02 /* Resources */,
 				DA444B1AFA9F4C61D63D375F /* Views */,
 			);
-			path = VoiceInput;
+			path = Shengvo;
 			sourceTree = "<group>";
 		};
 		CF9313599A063614C1887613 /* App */ = {
 			isa = PBXGroup;
 			children = (
 				D9567AA0F135D9ED87321B65 /* Info.plist */,
-				0B708BAA8F982A05876C7CD1 /* VoiceInputApp.swift */,
+				0B708BAA8F982A05876C7CD1 /* ShengvoApp.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -176,9 +176,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		48ACF5FA6ECBC71A34114E9A /* VoiceInput */ = {
+		48ACF5FA6ECBC71A34114E9A /* Shengvo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F6BA6B0A361EA6C3A5FA240D /* Build configuration list for PBXNativeTarget "VoiceInput" */;
+			buildConfigurationList = F6BA6B0A361EA6C3A5FA240D /* Build configuration list for PBXNativeTarget "Shengvo" */;
 			buildPhases = (
 				C35B10D48E421FB038B7EA39 /* Sources */,
 				F6DFAFF396317BC727C8F51C /* Resources */,
@@ -189,9 +189,9 @@
 			);
 			dependencies = (
 			);
-			name = VoiceInput;
-			productName = VoiceInput;
-			productReference = A32BB963BE2685D5364B725F /* VoiceInput.app */;
+			name = Shengvo;
+			productName = Shengvo;
+			productReference = A32BB963BE2685D5364B725F /* Shengvo.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -208,7 +208,7 @@
 					};
 				};
 			};
-			buildConfigurationList = EE9E90117BEEEED3CF5BE462 /* Build configuration list for PBXProject "VoiceInput" */;
+			buildConfigurationList = EE9E90117BEEEED3CF5BE462 /* Build configuration list for PBXProject "Shengvo" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -223,7 +223,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				48ACF5FA6ECBC71A34114E9A /* VoiceInput */,
+				48ACF5FA6ECBC71A34114E9A /* Shengvo */,
 			);
 		};
 /* End PBXProject section */
@@ -262,7 +262,7 @@
 				5B8D56432C67E1FD87DC02CB /* SettingsView.swift in Sources */,
 				E0C200FED4F67E4AF8007F01 /* SetupView.swift in Sources */,
 				D5DCA0CC3880C465C172C2E9 /* SoundManager.swift in Sources */,
-				8459FE87086708576E8B18A5 /* VoiceInputApp.swift in Sources */,
+				8459FE87086708576E8B18A5 /* ShengvoApp.swift in Sources */,
 				C78E6F6B32D0925FB9A13833 /* AppLogger.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -274,17 +274,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = VoiceInput/VoiceInput.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Shengvo/Shengvo.entitlements;
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_HARDENED_RUNTIME = NO;
-				INFOPLIST_FILE = VoiceInput/App/Info.plist;
+				INFOPLIST_FILE = Shengvo/App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.voiceinput.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shengvo.app;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -416,17 +416,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = VoiceInput/VoiceInput.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Shengvo/Shengvo.entitlements;
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_HARDENED_RUNTIME = NO;
-				INFOPLIST_FILE = VoiceInput/App/Info.plist;
+				INFOPLIST_FILE = Shengvo/App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.voiceinput.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shengvo.app;
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -434,7 +434,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		EE9E90117BEEEED3CF5BE462 /* Build configuration list for PBXProject "VoiceInput" */ = {
+		EE9E90117BEEEED3CF5BE462 /* Build configuration list for PBXProject "Shengvo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3203A627CE71C3F65887EC9F /* Debug */,
@@ -443,7 +443,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		F6BA6B0A361EA6C3A5FA240D /* Build configuration list for PBXNativeTarget "VoiceInput" */ = {
+		F6BA6B0A361EA6C3A5FA240D /* Build configuration list for PBXNativeTarget "Shengvo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				444452D61C1107F7AC9A8843 /* Debug */,

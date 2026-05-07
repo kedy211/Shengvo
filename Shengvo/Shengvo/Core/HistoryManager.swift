@@ -4,12 +4,12 @@ class HistoryManager {
     static let shared = HistoryManager()
 
     private let maxEntries = 500
-    private let queue = DispatchQueue(label: "com.voiceinput.history", qos: .userInitiated)
+    private let queue = DispatchQueue(label: "com.shengvo.history", qos: .userInitiated)
     private var entries: [HistoryEntry] = []
 
     private var storageURL: URL {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let dir = appSupport.appendingPathComponent("VoiceInput")
+        let dir = appSupport.appendingPathComponent("Shengvo")
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir.appendingPathComponent("history.json")
     }

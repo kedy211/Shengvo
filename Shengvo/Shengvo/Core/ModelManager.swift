@@ -17,7 +17,7 @@ class ModelManager: ObservableObject {
 
     private var supportDir: URL {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        return appSupport.appendingPathComponent("com.voiceinput.app")
+        return appSupport.appendingPathComponent("com.shengvo.app")
     }
 
     var modelPath: String? {

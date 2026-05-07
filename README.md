@@ -31,10 +31,10 @@ macOS 语音输入法，一键将语音转化为精准文字。
 ```bash
 git clone https://github.com/kedy211/Shengvo.git
 cd Shengvo
-open VoiceInput/VoiceInput.xcodeproj
+open Shengvo/Shengvo.xcodeproj
 ```
 
-在 Xcode 中选择 `VoiceInput` scheme，按 `Cmd+R` 运行。
+在 Xcode 中选择 `Shengvo` scheme，按 `Cmd+R` 运行。
 
 首次运行会弹出设置向导，引导完成**麦克风权限**和**辅助功能权限**授权。
 
@@ -84,9 +84,9 @@ open VoiceInput/VoiceInput.xcodeproj
 ## 项目结构
 
 ```
-VoiceInput/
+Shengvo/
 ├── App/                    # 应用入口
-│   └── VoiceInputApp.swift # 主控制器，录音→识别→LLM→输出流程
+│   └── ShengvoApp.swift # 主控制器，录音→识别→LLM→输出流程
 ├── Core/
 │   ├── AudioRecorder.swift    # 录音管理 (16kHz mono)
 │   ├── ASRService.swift       # ASR 双引擎调度 (本地 Whisper / 云端)
@@ -126,7 +126,7 @@ VoiceInput/
 
 - 本地 Whisper 模式下，音频不离开本机
 - 云端 ASR 和 LLM 模式下，仅发送必要数据
-- 历史记录仅保存在本地 `~/Library/Application Support/VoiceInput/`
+- 历史记录仅保存在本地 `~/Library/Application Support/Shengvo/`
 - API 密钥保存在本地 UserDefaults
 
 ## 开源协议
