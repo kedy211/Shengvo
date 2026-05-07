@@ -6,21 +6,66 @@ class ClipboardManager {
 
     private init() {}
 
-    func copyToClipboard(text: String) {
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.setString(text, forType: .string)
-        print("[Clipboard] Copied \(text.count) chars to clipboard")
-    }
-
     func checkAccessibility() -> Bool {
         let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): false] as CFDictionary
         return AXIsProcessTrustedWithOptions(options)
     }
 
-    func pasteFromClipboard() {
+    // MARK: - Direct text injection (preferred)
+
+    /// Attempt to inject text directly into the focused element via Accessibility API.
+    /// Returns true on success, false if clipboard fallback is needed.
+    func injectTextDirectly(_ text: String) -> Bool {
         guard checkAccessibility() else {
-            print("[Clipboard] Accessibility NOT granted - cannot paste")
+            print("[Input] Accessibility NOT granted, fallback to clipboard")
+            return false
+        }
+
+        guard let app = NSWorkspace.shared.frontmostApplication else {
+            print("[Input] No frontmost application")
+            return false
+        }
+
+        let pid = app.processIdentifier
+        let appElement = AXUIElementCreateApplication(pid)
+
+        var focusedElement: CFTypeRef?
+        let result = AXUIElementCopyAttributeValue(appElement, kAXFocusedUIElementAttribute as CFString, &focusedElement)
+
+        guard result == .success, let element = focusedElement else {
+            print("[Input] Cannot get focused element (error: \(result.rawValue)), fallback to clipboard")
+            return false
+        }
+
+        let axElement = element as! AXUIElement
+
+        // Try kAXValueAttribute first (works for standard NSTextField, NSTextView, most native apps)
+        var setResult = AXUIElementSetAttributeValue(axElement, kAXValueAttribute as CFString, text as CFTypeRef)
+        if setResult == .success {
+            print("[Input] Direct text injection succeeded via kAXValueAttribute")
+            return true
+        }
+
+        // Try kAXSelectedTextAttribute (works for some editors when text is selected)
+        setResult = AXUIElementSetAttributeValue(axElement, kAXSelectedTextAttribute as CFString, text as CFTypeRef)
+        if setResult == .success {
+            print("[Input] Direct text injection succeeded via kAXSelectedTextAttribute")
+            return true
+        }
+
+        print("[Input] Direct injection failed (value: \(setResult.rawValue)), fallback to clipboard")
+        return false
+    }
+
+    // MARK: - Clipboard-based fallback
+
+    func pasteViaClipboard(text: String) {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(text, forType: .string)
+
+        guard checkAccessibility() else {
+            print("[Input] Accessibility NOT granted - cannot paste")
             DispatchQueue.main.async {
                 let alert = NSAlert()
                 alert.messageText = "无法粘贴"
@@ -36,7 +81,7 @@ class ClipboardManager {
             return
         }
 
-        // Use osascript to paste
+        // Try osascript first, fallback to CGEvent
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
         process.arguments = ["-e", "tell application \"System Events\" to keystroke \"v\" using command down"]
@@ -52,14 +97,13 @@ class ClipboardManager {
             let errorStr = String(data: errorData, encoding: .utf8) ?? ""
 
             if process.terminationStatus == 0 {
-                print("[Clipboard] Paste succeeded via osascript")
+                print("[Input] Clipboard paste succeeded via osascript")
             } else {
-                print("[Clipboard] osascript failed: \(errorStr)")
-                // Fallback to CGEvent
+                print("[Input] osascript failed: \(errorStr)")
                 pasteViaCGEvent()
             }
         } catch {
-            print("[Clipboard] osascript error: \(error)")
+            print("[Input] osascript error: \(error)")
             pasteViaCGEvent()
         }
     }
@@ -73,11 +117,30 @@ class ClipboardManager {
         let keyUp = CGEvent(keyboardEventSource: source, virtualKey: 0x09, keyDown: false)
         keyUp?.flags = .maskCommand
         keyUp?.post(tap: .cgAnnotatedSessionEventTap)
-        print("[Clipboard] CGEvent paste sent")
+        print("[Input] CGEvent paste sent")
     }
 
+    // MARK: - Convenience
+
+    /// Paste text: try direct AX injection first, fall back to clipboard Cmd+V.
+    func pasteText(_ text: String) {
+        if injectTextDirectly(text) {
+            return
+        }
+        pasteViaClipboard(text: text)
+    }
+
+    /// Just copy to clipboard (for manual user paste).
+    func copyToClipboard(text: String) {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(text, forType: .string)
+        print("[Input] Copied \(text.count) chars to clipboard")
+    }
+
+    /// Copy to clipboard then paste (for history panel paste).
     func copyAndPaste(text: String) {
         copyToClipboard(text: text)
-        pasteFromClipboard()
+        pasteText(text)
     }
 }

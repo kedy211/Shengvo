@@ -127,6 +127,7 @@ struct SettingsView: View {
                 SectionHeader(title: "选项")
                 SettingToggleRow(title: "开机自启动", isOn: $config.launchAtLogin)
                 SettingToggleRow(title: "显示通知", isOn: $config.showNotifications)
+                SettingToggleRow(title: "启用日志", subtitle: "记录识别和处理的完整过程到 ~/Library/Logs/Shengvo/", isOn: $config.logEnabled)
                 SettingDoubleField(
                     title: "最短录音时长",
                     unit: "秒",
@@ -208,9 +209,41 @@ struct SettingsView: View {
                 // ASR Section
                 SectionHeader(title: "语音识别 (ASR)")
 
-                SettingTextField(title: "App ID", placeholder: "火山引擎 App ID", text: $config.asrAppID)
-                SettingTextField(title: "Access Token", placeholder: "Access Token", text: $config.asrAccessToken, isSecure: true)
-                SettingTextField(title: "Secret Key", placeholder: "Secret Key", text: $config.asrSecretKey, isSecure: true)
+                // ASR Mode Picker
+                HStack(spacing: 12) {
+                    Text("识别引擎")
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(.primary)
+                    Spacer()
+                    Picker("", selection: $config.asrMode) {
+                        Text("本地 (Whisper)").tag("local")
+                        Text("云端 (火山引擎)").tag("cloud")
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 260)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .frame(height: 40)
+
+                if config.asrMode == "local" {
+                    HStack(spacing: 8) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.system(size: 14))
+                        Text("Whisper base (q8_0 量化, ~95MB)")
+                            .font(.system(size: 13, weight: .regular))
+                        Spacer()
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 6)
+                }
+
+                if config.asrMode == "cloud" {
+                    SettingTextField(title: "App ID", placeholder: "火山引擎 App ID", text: $config.asrAppID)
+                    SettingTextField(title: "Access Token", placeholder: "Access Token", text: $config.asrAccessToken, isSecure: true)
+                    SettingTextField(title: "Secret Key", placeholder: "Secret Key", text: $config.asrSecretKey, isSecure: true)
+                }
 
                 Divider().padding(.horizontal, 16)
 
@@ -279,6 +312,12 @@ struct SettingsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 SectionHeader(title: "自定义识别词")
+
+                Text("添加专业术语和专有名词，LLM 会据此纠正识别错误")
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 4)
 
                 // Input area
                 CustomWordInputView(customWords: $customWords)
@@ -510,10 +549,11 @@ struct SettingsView: View {
                 // Features
                 SectionHeader(title: "功能特性")
                 VStack(alignment: .leading, spacing: 4) {
-                    aboutFeature("语音识别", "基于火山引擎 ASR，高精度中文语音转文字")
+                    aboutFeature("语音识别", "支持本地 Whisper / 云端火山引擎 ASR 双引擎")
                     aboutFeature("LLM 文本整理", "自动修正同音错字、补充标点、去除口语冗余")
                     aboutFeature("应用感知", "根据当前目标应用自动调整输出风格")
-                    aboutFeature("自定义识别词", "添加专有名词、术语，提升识别准确率")
+                    aboutFeature("自定义识别词", "添加专有名词和术语，由 LLM 自动纠正")
+                    aboutFeature("调试日志", "记录识别和处理的完整过程，支持导出调优")
                     aboutFeature("历史记录", "自动保存每次输入，支持复制和粘贴")
                     aboutFeature("全局快捷键", "默认 ⌘⇧V，可在设置中自定义")
                 }

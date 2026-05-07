@@ -8,7 +8,8 @@ struct AppConfig: Codable {
     var hotKeyModifiers: UInt32 = UInt32(cmdKey | shiftKey) // Cmd+Shift
     var hotKeyUsesFn: Bool = false // Whether fn is part of the hotkey
 
-    // ASR - Volcano Engine
+    // ASR
+    var asrMode: String = "local" // "local" = Whisper, "cloud" = Volcano Engine
     var asrAppID: String = ""
     var asrAccessToken: String = ""
     var asrSecretKey: String = ""
@@ -54,6 +55,7 @@ struct AppConfig: Codable {
     // General
     var launchAtLogin: Bool = true
     var showNotifications: Bool = true
+    var logEnabled: Bool = false
 
     static var shared: AppConfig = {
         if let data = UserDefaults.standard.data(forKey: "appConfig"),

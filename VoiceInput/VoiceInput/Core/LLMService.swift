@@ -4,58 +4,58 @@ class LLMService {
     // App-specific style hints
     private let appStyleMap: [String: String] = [
         // Code editors
-        "Xcode": "输出简洁的技术内容，可以包含代码片段。使用技术术语。",
-        "Code": "输出简洁的技术内容，可以包含代码片段。使用技术术语。",
-        "Cursor": "输出简洁的技术内容，可以包含代码片段。使用技术术语。",
-        "Sublime Text": "输出简洁的技术内容，可以包含代码片段。使用技术术语。",
-        "Typora": "输出简洁的技术内容，可以包含代码片段。使用技术术语。",
+        "Xcode": "输出简洁的技术内容，适合编程场景。可包含代码片段，使用准确的技术术语。",
+        "Code": "输出简洁的技术内容，适合编程场景。可包含代码片段，使用准确的技术术语。",
+        "Cursor": "输出简洁的技术内容，适合编程场景。可包含代码片段，使用准确的技术术语。",
+        "Sublime Text": "输出简洁的技术内容，适合编程场景。可包含代码片段，使用准确的技术术语。",
+        "Typora": "输出简洁的技术内容，适合编程场景。可包含代码片段，使用准确的技术术语。",
 
         // Chat / IM
-        "微信": "使用轻松友好的语气，适合即时消息沟通。简洁自然。",
-        "WeChat": "使用轻松友好的语气，适合即时消息沟通。简洁自然。",
-        "钉钉": "使用简洁专业的语气，适合工作沟通。",
-        "DingTalk": "使用简洁专业的语气，适合工作沟通。",
-        "飞书": "使用简洁专业的语气，适合工作沟通。",
-        "Lark": "使用简洁专业的语气，适合工作沟通。",
-        "Telegram": "使用轻松友好的语气，适合即时消息沟通。",
-        "Slack": "使用轻松友好的语气，适合团队沟通。",
-        "Discord": "使用轻松友好的语气，适合即时消息沟通。",
-        "QQ": "使用轻松友好的语气，适合即时消息沟通。",
-        "企业微信": "使用简洁专业的语气，适合工作沟通。",
+        "微信": "轻松友好的聊天语气，适合即时消息。简短自然，可适当使用口语化表达。",
+        "WeChat": "轻松友好的聊天语气，适合即时消息。简短自然，可适当使用口语化表达。",
+        "钉钉": "简洁专业的工作沟通语气，适合企业协作。直接明了，避免冗余。",
+        "DingTalk": "简洁专业的工作沟通语气，适合企业协作。直接明了，避免冗余。",
+        "飞书": "简洁专业的工作沟通语气，适合团队协作。条理清晰，重点突出。",
+        "Lark": "简洁专业的工作沟通语气，适合团队协作。条理清晰，重点突出。",
+        "Telegram": "轻松自然的聊天语气，适合即时消息。",
+        "Slack": "简洁友好的团队沟通语气，适合工作讨论。",
+        "Discord": "轻松自然的聊天语气，适合社区交流。",
+        "QQ": "轻松自然的聊天语气，适合即时消息。",
+        "企业微信": "简洁专业的工作沟通语气，适合企业协作。直接明了，避免冗余。",
 
         // Email
-        "Mail": "使用正式专业的语气，适合商务邮件。注意礼貌用语。",
-        "邮件": "使用正式专业的语气，适合商务邮件。注意礼貌用语。",
-        "Outlook": "使用正式专业的语气，适合商务邮件。注意礼貌用语。",
-        "Spark": "使用正式专业的语气，适合商务邮件。注意礼貌用语。",
-        "Thunderbird": "使用正式专业的语气，适合商务邮件。注意礼貌用语。",
+        "Mail": "正式专业的商务邮件语气。注意礼貌用语，结构完整的书信格式。",
+        "邮件": "正式专业的商务邮件语气。注意礼貌用语，结构完整的书信格式。",
+        "Outlook": "正式专业的商务邮件语气。注意礼貌用语，结构完整的书信格式。",
+        "Spark": "正式专业的商务邮件语气。注意礼貌用语，结构完整的书信格式。",
+        "Thunderbird": "正式专业的商务邮件语气。注意礼貌用语，结构完整的书信格式。",
 
         // Notes
-        "备忘录": "使用清晰有条理的格式，适合笔记记录。",
-        "Notes": "使用清晰有条理的格式，适合笔记记录。",
-        "Notion": "使用清晰有条理的格式，适合笔记记录。可以使用标题和列表。",
-        "Obsidian": "使用清晰有条理的格式，适合笔记记录。可以使用 Markdown 语法。",
-        "Bear": "使用清晰有条理的格式，适合笔记记录。",
+        "备忘录": "简洁有条理的笔记格式，便于快速记录和回顾。",
+        "Notes": "简洁有条理的笔记格式，便于快速记录和回顾。",
+        "Notion": "结构清晰的笔记格式。善用标题、列表和段落组织内容。",
+        "Obsidian": "适合 Markdown 笔记的格式。善用标题、列表和链接组织内容。",
+        "Bear": "简洁有条理的笔记格式，适合快速记录想法。",
 
         // Document editors
-        "Pages": "使用正式的书面语气，适合文档编辑。",
-        "Word": "使用正式的书面语气，适合文档编辑。",
-        "Google Docs": "使用正式的书面语气，适合文档编辑。",
-        "WPS": "使用正式的书面语气，适合文档编辑。",
+        "Pages": "正式规范的书面表达，段落分明，适合文档撰写。",
+        "Word": "正式规范的书面表达，段落分明，适合文档撰写。",
+        "Google Docs": "正式规范的书面表达，段落分明，适合文档撰写。",
+        "WPS": "正式规范的书面表达，段落分明，适合文档撰写。",
 
         // Browser
-        "Safari": "根据上下文判断用途，保持简洁。",
-        "Chrome": "根据上下文判断用途，保持简洁。",
-        "Firefox": "根据上下文判断用途，保持简洁。",
+        "Safari": "根据输入内容的场景自行判断，保持自然流畅。",
+        "Chrome": "根据输入内容的场景自行判断，保持自然流畅。",
+        "Firefox": "根据输入内容的场景自行判断，保持自然流畅。",
 
         // Terminal
-        "终端": "输出命令或技术内容，保持简洁。",
-        "Terminal": "输出命令或技术内容，保持简洁。",
-        "iTerm2": "输出命令或技术内容，保持简洁。",
+        "终端": "适合命令行的输出格式。纯文本，直接输出命令或简洁的技术内容。",
+        "Terminal": "适合命令行的输出格式。纯文本，直接输出命令或简洁的技术内容。",
+        "iTerm2": "适合命令行的输出格式。纯文本，直接输出命令或简洁的技术内容。",
 
         // Design
-        "Figma": "使用设计相关的术语，描述清晰。",
-        "Sketch": "使用设计相关的术语，描述清晰。",
+        "Figma": "使用设计领域术语，描述准确清晰，适合设计协作场景。",
+        "Sketch": "使用设计领域术语，描述准确清晰，适合设计协作场景。",
     ]
 
     func processText(_ text: String, targetApp: String? = nil, completion: @escaping (Result<String, Error>) -> Void) {
@@ -85,12 +85,19 @@ class LLMService {
             }
 
             if let style = matchedStyle {
-                systemPrompt += "\n\n---\n当前输入目标应用: \(appName)\n针对此应用的风格要求: \(style)"
+                systemPrompt += "\n\n---\n当前正在向 [\(appName)] 输入文字。请针对此类应用场景调整输出：\(style)"
                 print("[LLM] Matched app: \(appName) → style hint applied")
             } else {
-                systemPrompt += "\n\n---\n当前输入目标应用: \(appName)\n请根据该应用的特点调整输出风格。"
+                systemPrompt += "\n\n---\n当前正在向 [\(appName)] 输入文字。请根据该应用的类型和使用场景，自动调整语言风格、表达方式和格式，使其更贴合该应用的上下文。"
                 print("[LLM] Target app: \(appName) (no specific style, using generic hint)")
             }
+        }
+
+        // Inject custom words as hot word correction hint
+        if !config.customWords.isEmpty {
+            let words = config.customWords.joined(separator: "、")
+            systemPrompt += "\n\n---\n以下是本用户的专业术语/自定义词汇：\(words)\n如果语音识别结果中存在与以上词汇发音近似但写法错误的内容，请纠正为对应词汇的正确写法。仅纠正明显发音错误，不要随意改写正确内容。"
+            print("[LLM] Custom words injected for correction: \(words)")
         }
 
         print("[LLM] === System Prompt (first 200 chars) ===")
@@ -120,7 +127,12 @@ class LLMService {
         print("[LLM] Model: \(config.llmModel)")
         print("[LLM] Input: \(text.prefix(100))...")
 
+        let capturedPrompt = systemPrompt
+        let startTime = CFAbsoluteTimeGetCurrent()
+
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            let elapsed = Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000)
+
             if let error = error {
                 print("[LLM] Request error: \(error.localizedDescription)")
                 completion(.failure(error))
@@ -145,6 +157,7 @@ class LLMService {
                 let llmResponse = try JSONDecoder().decode(LLMResponse.self, from: data)
                 if let content = llmResponse.choices?.first?.message?.content, !content.isEmpty {
                     print("[LLM] Processed: \(content.prefix(100))...")
+                    AppLogger.shared.logLLM(systemPrompt: capturedPrompt, userText: text, output: content, durationMs: elapsed)
                     completion(.success(content))
                 } else {
                     print("[LLM] Empty response")

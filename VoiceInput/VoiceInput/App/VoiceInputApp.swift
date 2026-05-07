@@ -38,7 +38,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setupStatusBar()
-        setupHotKey()
 
         NotificationCenter.default.addObserver(
             self,
@@ -47,9 +46,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             object: nil
         )
 
-        // Check if setup is needed
+        // Check permissions first — show setup if needed
         if needsSetup() {
             showSetupWindow()
+        }
+
+        // Only register hotkey if accessibility is already granted;
+        // otherwise handleSettingsChange will do it after user grants permissions.
+        if AXIsProcessTrusted() {
+            setupHotKey()
         }
     }
 
@@ -283,8 +288,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
             switch result {
             case .success(let text):
-                print("[Timing] ASR 完成: \(String(format: "%.2f", elapsed))s, 总耗时: \(String(format: "%.2f", totalElapsed))s")
+                let elapsedMs = Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000)
+                print("[Timing] ASR 完成: \(String(format: "%.2f", CFAbsoluteTimeGetCurrent() - startTime))s, 总耗时: \(String(format: "%.2f", totalElapsed))s")
                 print("[Timing] 识别结果: \(text)")
+                AppLogger.shared.logASR(mode: AppConfig.shared.asrMode, inputSize: audioData.count, output: text, durationMs: elapsedMs)
                 self.processTextWithLLM(text)
             case .failure(let error):
                 print("[Timing] ASR 失败: \(String(format: "%.2f", elapsed))s, 错误: \(error)")
@@ -349,15 +356,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         )
         HistoryManager.shared.addEntry(entry)
 
-        // Copy to clipboard
-        clipboardManager.copyToClipboard(text: text)
-
-        // Reset state
+        // Reset state before paste (so recording can start again)
         resetState()
 
-        // Paste
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            self.clipboardManager.pasteFromClipboard()
+        // Inject text directly via Accessibility API (fallback to clipboard)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            ClipboardManager.shared.pasteText(text)
             let pasteTime = CFAbsoluteTimeGetCurrent() - startTime
             print("[Timing] 粘贴完成: \(String(format: "%.2f", pasteTime))s")
         }
@@ -465,7 +469,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     @objc private func handleSettingsChange() {
         let config = AppConfig.shared
 
-        hotKeyManager.unregisterAll()
+        // Ensure hotKeyManager exists (may not have been created on launch if accessibility wasn't granted)
+        if hotKeyManager == nil {
+            hotKeyManager = HotKeyManager()
+        } else {
+            hotKeyManager.unregisterAll()
+        }
 
         if config.hotKeyUsesFn {
             hotKeyManager.startFnEventTap(

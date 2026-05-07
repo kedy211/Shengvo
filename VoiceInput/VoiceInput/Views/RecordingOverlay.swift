@@ -32,10 +32,10 @@ class RecordingOverlay {
 
         let contentView = OverlayContentView(viewModel: viewModel)
         let hosting = NSHostingController(rootView: contentView)
-        hosting.view.frame = NSRect(x: 0, y: 0, width: 160, height: 44)
+        hosting.view.frame = NSRect(x: 0, y: 0, width: 128, height: 35)
 
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 160, height: 44),
+            contentRect: NSRect(x: 0, y: 0, width: 128, height: 35),
             styleMask: [.borderless],
             backing: .buffered,
             defer: false
@@ -48,31 +48,19 @@ class RecordingOverlay {
         window.collectionBehavior = [.canJoinAllSpaces, .stationary]
         window.isMovableByWindowBackground = false
 
-        // Position at cursor location
-        let mouseLocation = NSEvent.mouseLocation
-        let windowWidth: CGFloat = 160
-        let windowHeight: CGFloat = 44
-        let xOffset: CGFloat = 20
-        let yOffset: CGFloat = 16
+        // Position at bottom center of main display
+        let windowWidth: CGFloat = 128
+        let bottomMargin: CGFloat = 40
 
-        var x = mouseLocation.x + xOffset
-        var y = mouseLocation.y + yOffset
-
-        // Clamp to visible screen area
+        let x: CGFloat
+        let y: CGFloat
         if let screen = NSScreen.main {
             let screenFrame = screen.visibleFrame
-            if x + windowWidth > screenFrame.maxX {
-                x = mouseLocation.x - xOffset - windowWidth
-            }
-            if y + windowHeight > screenFrame.maxY {
-                y = mouseLocation.y - yOffset - windowHeight
-            }
-            if x < screenFrame.minX {
-                x = screenFrame.minX
-            }
-            if y < screenFrame.minY {
-                y = screenFrame.minY
-            }
+            x = screenFrame.midX - windowWidth / 2
+            y = screenFrame.minY + bottomMargin
+        } else {
+            x = 400
+            y = 40
         }
 
         window.setFrameOrigin(NSPoint(x: x, y: y))
@@ -105,36 +93,41 @@ struct OverlayContentView: View {
     private let timer = Timer.publish(every: 0.08, on: .main, in: .common).autoconnect()
 
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 8) {
             if viewModel.state == .recording {
                 Image("inputicon")
                     .resizable()
-                    .frame(width: 18, height: 18)
-                    .clipShape(RoundedRectangle(cornerRadius: 5))
+                    .frame(width: 14, height: 14)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
 
                 WaveView(level: viewModel.audioLevel, phase: wavePhase)
-                    .frame(width: 70, height: 24)
+                    .frame(width: 56, height: 19)
             } else if viewModel.state == .processing {
                 ProgressView()
                     .progressViewStyle(.circular)
-                    .scaleEffect(0.8)
-                    .frame(width: 16, height: 16)
+                    .scaleEffect(0.65)
+                    .frame(width: 13, height: 13)
 
                 Text("处理中...")
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.white)
             }
         }
-        .frame(minHeight: 24, maxHeight: 24)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 22))
-        .overlay(
-            RoundedRectangle(cornerRadius: 22)
-                .stroke(Color.white.opacity(0.15), lineWidth: 0.5)
+        .frame(minHeight: 19, maxHeight: 19)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(
+            ZStack {
+                Color.black.opacity(0.45)
+                VisualEffectView(material: .hudWindow, blendingMode: .withinWindow)
+            }
         )
-        .frame(width: 160, height: 44)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.white.opacity(0.1), lineWidth: 0.4)
+        )
+        .frame(width: 128, height: 35)
         .onReceive(timer) { _ in
             if viewModel.state == .recording {
                 wavePhase += 0.35
@@ -145,27 +138,46 @@ struct OverlayContentView: View {
 
 // MARK: - Wave View
 
+// MARK: - Visual Effect NSViewRepresentable
+
+struct VisualEffectView: NSViewRepresentable {
+    let material: NSVisualEffectView.Material
+    let blendingMode: NSVisualEffectView.BlendingMode
+
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.material = material
+        view.blendingMode = blendingMode
+        view.state = .active
+        return view
+    }
+
+    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
+        nsView.material = material
+        nsView.blendingMode = blendingMode
+    }
+}
+
 struct WaveView: View {
     let level: Float
     let phase: Double
 
-    private let barCount = 5
-    private let barWidth: CGFloat = 3
-    private let maxHeight: CGFloat = 22
+    private let barCount = 4
+    private let barWidth: CGFloat = 2
+    private let maxHeight: CGFloat = 18
 
     var body: some View {
-        HStack(spacing: 3) {
+        HStack(spacing: 2) {
             ForEach(0..<barCount, id: \.self) { index in
                 let offset = Double(index) * 0.5
                 let boosted = pow(CGFloat(max(0.05, level)), 0.6)
                 let wave = 0.5 + 0.5 * sin(phase + offset)
                 let height = maxHeight * boosted * CGFloat(wave)
 
-                RoundedRectangle(cornerRadius: 1.5)
+                RoundedRectangle(cornerRadius: 1)
                     .fill(Color.white)
-                    .frame(width: barWidth, height: max(3, height))
+                    .frame(width: barWidth, height: max(2, height))
             }
         }
     }
 }
-
