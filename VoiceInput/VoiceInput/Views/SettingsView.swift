@@ -587,7 +587,7 @@ struct SettingsView: View {
                 SectionHeader(title: "系统信息")
                 VStack(alignment: .leading, spacing: 4) {
                     aboutInfoRow("系统要求", "macOS 13.0+")
-                    aboutInfoRow("应用版本", "1.0")
+                    aboutInfoRow("应用版本", "1.0.3")
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
