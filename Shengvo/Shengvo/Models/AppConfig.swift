@@ -24,39 +24,131 @@ struct AppConfig: Codable {
     var llmMinChars: Int = 10
     var llmReasoningEffort: String = "minimal"
     var minRecordingDuration: Double = 1.0 // seconds - recordings shorter than this are discarded
-    var llmSystemPrompt: String = """
-    你是语音输入的文本后处理引擎。将用户口语化的语音识别文本，处理为可直接使用的最终输出。
 
-    ## 处理原则
+    /// 用户自定义的系统提示词覆盖（nil 时使用 PromptManager 生成的默认提示词）
+    var customSystemPromptOverride: String?
 
-    1. **风格保真**：100%保留用户的用词习惯、语气词、口头禅。禁止为追求书面化而改写原生表达。
-    2. **最小改动**：仅执行——删除语音噪音、修正ASR错误、删除重复、补充标点。禁止重构语句。
-    3. **用户指令优先**：当用户给出改写/翻译/格式指令时，按指令执行，覆盖上述规则。
-
-    ## 处理规则
-
-    - **删除**：语气填充词（嗯、啊、呃、那个、um、uh、like等无实际语义的部分）
-    - **删除**：语音停顿导致的重复短语（如"A的B的C的A的B的C"→"A的B的C"）
-    - **修正**：同音错字（在/再、的/得/地、以/已等），根据上下文判断
-    - **修正**：ASR错误拆分的术语（如"Open code"→"opencode"）
-    - **补充**：句号、逗号、问号等基础标点
-    - **不做**：不改口语表达、不调整语序、不补充省略内容、不改变人称、不重构句式
-
-    ## 列表识别
-
-    当用户使用"第一点……第二点……""步骤一……步骤二……"等结构时，自动转换为编号列表（1. 2. 3.）。
-
-    ## 输出规则
-
-    - 始终只输出处理后的纯文本
-    - 禁止添加解释、说明、对话
-    - 禁止包裹代码块、引号等格式符号
-    """
+    // 多轮上下文
+    var conversationContextEnabled: Bool = false
+    var conversationContextMaxTurns: Int = 3
 
     // General
     var launchAtLogin: Bool = true
     var showNotifications: Bool = true
     var logEnabled: Bool = false
+
+    // MARK: - 计算属性
+
+    /// 生效的系统提示词：用户覆盖优先，否则使用 PromptManager 默认值
+    var effectiveSystemPrompt: String {
+        if let override = customSystemPromptOverride, !override.isEmpty {
+            return override
+        }
+        return PromptManager.systemPrompt(mode: .polish, hotwords: customWords)
+    }
+
+    // MARK: - Codable 迁移支持
+
+    /// 旧版字段：llmSystemPrompt（已迁移至 customSystemPromptOverride）
+    private static let oldDefaultSystemPrompt: String = {
+        // 旧版默认提示词的前 150 字符作为匹配锚点（足够区分默认和自定义）
+        "你是语音输入的文本后处理引擎。将用户口语化的语音识别文本，处理为可直接使用的最终输出。"
+    }()
+
+    enum CodingKeys: String, CodingKey {
+        case hotKeyKeyCode, hotKeyModifiers, hotKeyUsesFn
+        case asrMode, asrAppID, asrAccessToken, asrSecretKey, asrQwenAPIKey
+        case customWords
+        case llmEnabled, llmBaseURL, llmAPIKey, llmModel
+        case llmMinChars, llmReasoningEffort, minRecordingDuration
+        case customSystemPromptOverride
+        case conversationContextEnabled, conversationContextMaxTurns
+        case launchAtLogin, showNotifications, logEnabled
+        // 旧字段仅用于解码迁移，不编码
+        case llmSystemPrompt
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        hotKeyKeyCode = try container.decodeIfPresent(UInt32.self, forKey: .hotKeyKeyCode) ?? UInt32(kVK_ANSI_V)
+        hotKeyModifiers = try container.decodeIfPresent(UInt32.self, forKey: .hotKeyModifiers) ?? UInt32(cmdKey | shiftKey)
+        hotKeyUsesFn = try container.decodeIfPresent(Bool.self, forKey: .hotKeyUsesFn) ?? false
+
+        asrMode = try container.decodeIfPresent(String.self, forKey: .asrMode) ?? "local"
+        asrAppID = try container.decodeIfPresent(String.self, forKey: .asrAppID) ?? ""
+        asrAccessToken = try container.decodeIfPresent(String.self, forKey: .asrAccessToken) ?? ""
+        asrSecretKey = try container.decodeIfPresent(String.self, forKey: .asrSecretKey) ?? ""
+        asrQwenAPIKey = try container.decodeIfPresent(String.self, forKey: .asrQwenAPIKey) ?? ""
+        customWords = try container.decodeIfPresent([String].self, forKey: .customWords) ?? []
+
+        llmEnabled = try container.decodeIfPresent(Bool.self, forKey: .llmEnabled) ?? true
+        llmBaseURL = try container.decodeIfPresent(String.self, forKey: .llmBaseURL) ?? "https://ark.cn-beijing.volces.com/api/v3"
+        llmAPIKey = try container.decodeIfPresent(String.self, forKey: .llmAPIKey) ?? ""
+        llmModel = try container.decodeIfPresent(String.self, forKey: .llmModel) ?? "doubao-seed-2-0-lite-260215"
+        llmMinChars = try container.decodeIfPresent(Int.self, forKey: .llmMinChars) ?? 10
+        llmReasoningEffort = try container.decodeIfPresent(String.self, forKey: .llmReasoningEffort) ?? "minimal"
+        minRecordingDuration = try container.decodeIfPresent(Double.self, forKey: .minRecordingDuration) ?? 1.0
+
+        customSystemPromptOverride = try container.decodeIfPresent(String.self, forKey: .customSystemPromptOverride)
+
+        conversationContextEnabled = try container.decodeIfPresent(Bool.self, forKey: .conversationContextEnabled) ?? false
+        conversationContextMaxTurns = try container.decodeIfPresent(Int.self, forKey: .conversationContextMaxTurns) ?? 3
+
+        launchAtLogin = try container.decodeIfPresent(Bool.self, forKey: .launchAtLogin) ?? true
+        showNotifications = try container.decodeIfPresent(Bool.self, forKey: .showNotifications) ?? true
+        logEnabled = try container.decodeIfPresent(Bool.self, forKey: .logEnabled) ?? false
+
+        // 迁移旧字段 llmSystemPrompt → customSystemPromptOverride
+        if customSystemPromptOverride == nil,
+           let oldPrompt = try container.decodeIfPresent(String.self, forKey: .llmSystemPrompt),
+           !oldPrompt.isEmpty,
+           !oldPrompt.hasPrefix(Self.oldDefaultSystemPrompt) {
+            // 旧提示词与默认不同 → 视为用户自定义，迁移为覆盖
+            customSystemPromptOverride = oldPrompt
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(hotKeyKeyCode, forKey: .hotKeyKeyCode)
+        try container.encode(hotKeyModifiers, forKey: .hotKeyModifiers)
+        try container.encode(hotKeyUsesFn, forKey: .hotKeyUsesFn)
+
+        try container.encode(asrMode, forKey: .asrMode)
+        try container.encode(asrAppID, forKey: .asrAppID)
+        try container.encode(asrAccessToken, forKey: .asrAccessToken)
+        try container.encode(asrSecretKey, forKey: .asrSecretKey)
+        try container.encode(asrQwenAPIKey, forKey: .asrQwenAPIKey)
+        try container.encode(customWords, forKey: .customWords)
+
+        try container.encode(llmEnabled, forKey: .llmEnabled)
+        try container.encode(llmBaseURL, forKey: .llmBaseURL)
+        try container.encode(llmAPIKey, forKey: .llmAPIKey)
+        try container.encode(llmModel, forKey: .llmModel)
+        try container.encode(llmMinChars, forKey: .llmMinChars)
+        try container.encode(llmReasoningEffort, forKey: .llmReasoningEffort)
+        try container.encode(minRecordingDuration, forKey: .minRecordingDuration)
+
+        try container.encode(customSystemPromptOverride, forKey: .customSystemPromptOverride)
+
+        try container.encode(conversationContextEnabled, forKey: .conversationContextEnabled)
+        try container.encode(conversationContextMaxTurns, forKey: .conversationContextMaxTurns)
+
+        try container.encode(launchAtLogin, forKey: .launchAtLogin)
+        try container.encode(showNotifications, forKey: .showNotifications)
+        try container.encode(logEnabled, forKey: .logEnabled)
+
+        // 不编码 llmSystemPrompt（旧字段，已迁移）
+    }
+
+    // MARK: - Init
+
+    /// 使用所有属性的默认值构造（Codable 自定义 init(from:) 后需显式声明）
+    init() {}
+
+    // MARK: - Singleton & Persistence
 
     static var shared: AppConfig = {
         if let data = UserDefaults.standard.data(forKey: "appConfig"),
@@ -72,6 +164,8 @@ struct AppConfig: Codable {
         }
         AppConfig.shared = self
     }
+
+    // MARK: - Helpers
 
     var hotKeyDescription: String {
         var desc = ""

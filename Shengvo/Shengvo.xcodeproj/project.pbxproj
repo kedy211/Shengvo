@@ -30,6 +30,8 @@
 		D6C06341A9B45B4ABDEF883C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E3B8613233AE798AD0215C76 /* Assets.xcassets */; };
 		E0C200FED4F67E4AF8007F01 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F46DBC7BD8EC4D1264A4FCCF /* SetupView.swift */; };
 		F7829B241469BC9EF0E40A77 /* ASRResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B450C05C7FCDC0AB1E4B3DC3 /* ASRResponse.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* PromptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3C4D5E6F7A8B9C0D1E2F3A4 /* PromptManager.swift */; };
+		B2C3D4E5F6A7B8C9D0E1F2A3 /* ConversationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5D6E7F8A9B0C1D2E3F4A5B6 /* ConversationContext.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -72,6 +74,8 @@
 		F46DBC7BD8EC4D1264A4FCCF /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		FC6E6F2D5F7ED01CE9FF2B17 /* HistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryManager.swift; sourceTree = "<group>"; };
 		FCD3C419C34393D8DDE0AEAB /* RecordingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingOverlay.swift; sourceTree = "<group>"; };
+		B3C4D5E6F7A8B9C0D1E2F3A4 /* PromptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptManager.swift; sourceTree = "<group>"; };
+		C5D6E7F8A9B0C1D2E3F4A5B6 /* ConversationContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationContext.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,6 +111,8 @@
 				BE0DD8551BA62066D51B2D0F /* SoundManager.swift */,
 				9E5DD7DD102A3E45C57BA198 /* whisper.xcframework */,
 				B29DC30B3CC02B96B73A64C7 /* AppLogger.swift */,
+				B3C4D5E6F7A8B9C0D1E2F3A4 /* PromptManager.swift */,
+				C5D6E7F8A9B0C1D2E3F4A5B6 /* ConversationContext.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -264,6 +270,8 @@
 				D5DCA0CC3880C465C172C2E9 /* SoundManager.swift in Sources */,
 				8459FE87086708576E8B18A5 /* ShengvoApp.swift in Sources */,
 				C78E6F6B32D0925FB9A13833 /* AppLogger.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* PromptManager.swift in Sources */,
+				B2C3D4E5F6A7B8C9D0E1F2A3 /* ConversationContext.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -342,7 +350,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0.3;
+				MARKETING_VERSION = 1.1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -401,7 +409,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0.3;
+				MARKETING_VERSION = 1.1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = Shengvo;

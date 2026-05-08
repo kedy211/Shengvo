@@ -284,14 +284,137 @@ struct SettingsView: View {
 
                     Divider().padding(.horizontal, 16)
 
-                    // System Prompt
-                    SectionHeader(title: " ")
-                    SettingTextEditor(
-                        title: "系统提示词",
-                        subtitle: "自定义 LLM 处理文本的行为规则",
-                        placeholder: "输入系统提示词...",
-                        text: $config.llmSystemPrompt
+                    // System Prompt — 自定义覆盖模式
+                    SectionHeader(title: "系统提示词")
+
+                    SettingToggleRow(
+                        title: "启用自定义系统提示词",
+                        subtitle: "开启后可编辑完整的系统提示词，覆盖默认的模块化提示词",
+                        isOn: Binding<Bool>(
+                            get: { config.customSystemPromptOverride != nil },
+                            set: { enabled in
+                                if enabled {
+                                    config.customSystemPromptOverride = config.effectiveSystemPrompt
+                                } else {
+                                    config.customSystemPromptOverride = nil
+                                }
+                            }
+                        )
                     )
+
+                    if config.customSystemPromptOverride != nil {
+                        SettingTextEditor(
+                            title: "自定义提示词",
+                            subtitle: "直接编辑系统提示词。清空内容并关闭上方开关可恢复默认。",
+                            placeholder: "输入系统提示词...",
+                            text: Binding<String>(
+                                get: { config.customSystemPromptOverride ?? "" },
+                                set: { config.customSystemPromptOverride = $0 }
+                            )
+                        )
+
+                        // 重置按钮
+                        HStack {
+                            Spacer()
+                            Button("重置为默认提示词") {
+                                config.customSystemPromptOverride = nil
+                            }
+                            .font(.system(size: 12))
+                            .foregroundColor(.accentColor)
+                            .buttonStyle(.borderless)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 8)
+                    }
+
+                    // 默认提示词预览（只读）
+                    if config.customSystemPromptOverride == nil {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("当前默认提示词（只读预览）")
+                                    .font(.system(size: 12, weight: .regular))
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text("\(PromptManager.systemPrompt(mode: .polish).count) 字")
+                                    .font(.system(size: 11, weight: .regular))
+                                    .foregroundColor(.secondary)
+                            }
+
+                            ScrollView {
+                                Text(PromptManager.systemPrompt(mode: .polish))
+                                    .font(.system(size: 11, weight: .regular, design: .monospaced))
+                                    .foregroundColor(.secondary)
+                                    .textSelection(.enabled)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .frame(height: 140)
+                            .padding(10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(Color.primary.opacity(0.03))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.primary.opacity(0.08), lineWidth: 0.5)
+                            )
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                    }
+
+                    Divider().padding(.horizontal, 16)
+
+                    // Multi-turn Context
+                    SectionHeader(title: "多轮上下文")
+
+                    SettingToggleRow(
+                        title: "启用多轮上下文",
+                        subtitle: "连续口述时，将前几次的内容作为上下文传给 LLM，提升连贯性",
+                        isOn: $config.conversationContextEnabled
+                    )
+
+                    if config.conversationContextEnabled {
+                        HStack(spacing: 12) {
+                            Text("最大上下文轮数")
+                                .font(.system(size: 14, weight: .regular))
+                                .foregroundColor(.primary)
+
+                            Spacer()
+
+                            HStack(spacing: 4) {
+                                ForEach(1...5, id: \.self) { n in
+                                    Button {
+                                        config.conversationContextMaxTurns = n
+                                    } label: {
+                                        Text("\(n)")
+                                            .font(.system(size: 13, weight: .medium))
+                                            .foregroundColor(config.conversationContextMaxTurns == n ? .white : .primary)
+                                            .frame(width: 28, height: 24)
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 4)
+                                                    .fill(config.conversationContextMaxTurns == n
+                                                          ? Color.accentColor
+                                                          : Color.primary.opacity(0.08))
+                                            )
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+
+                        HStack(spacing: 8) {
+                            Image(systemName: "info.circle")
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+                            Text("保留最近 \(config.conversationContextMaxTurns) 轮口述上下文。每轮会额外消耗 tokens，建议 2-3 轮即可。")
+                                .font(.system(size: 12, weight: .regular))
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 6)
+                    }
                 }
             }
             .padding(.vertical, 16)
@@ -535,6 +658,15 @@ struct SettingsView: View {
 
     private let githubURL = "https://github.com/kedy211/Shengvo"
 
+    /// 从 Info.plist 读取应用版本号
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+    }
+
+    private var appBuildNumber: String {
+        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+    }
+
     private var aboutSettings: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
@@ -602,7 +734,7 @@ struct SettingsView: View {
                 SectionHeader(title: "系统信息")
                 VStack(alignment: .leading, spacing: 4) {
                     aboutInfoRow("系统要求", "macOS 13.0+")
-                    aboutInfoRow("应用版本", "1.0.3")
+                    aboutInfoRow("应用版本", "\(appVersion) (build \(appBuildNumber))")
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)

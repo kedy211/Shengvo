@@ -72,8 +72,6 @@ struct SettingNumberField: View {
     @Binding var value: Int
     let range: ClosedRange<Int>
 
-    @State private var textValue: String = ""
-    @FocusState private var isFocused: Bool
     @State private var isHovered = false
 
     init(title: String, unit: String = "", value: Binding<Int>, range: ClosedRange<Int> = 0...Int.max) {
@@ -91,20 +89,15 @@ struct SettingNumberField: View {
 
             Spacer()
 
-            HStack(spacing: 4) {
-                Button(action: { adjustValue(-1) }) {
-                    Image(systemName: "minus")
-                        .font(.system(size: 10, weight: .medium))
-                        .frame(width: 20, height: 20)
-                }
-                .buttonStyle(.plain)
-                .foregroundColor(.secondary)
-                .clipShape(RoundedRectangle(cornerRadius: 4))
+            HStack(spacing: 6) {
+                Stepper("", value: $value, in: range)
+                    .labelsHidden()
+                    .scaleEffect(0.8)
 
-                TextField("", text: $textValue)
+                TextField("", value: $value, format: .number)
                     .font(.system(size: 13, weight: .regular))
                     .multilineTextAlignment(.center)
-                    .frame(width: 52, height: 24)
+                    .frame(width: 52)
                     .textFieldStyle(.plain)
                     .background(
                         RoundedRectangle(cornerRadius: 6)
@@ -112,27 +105,8 @@ struct SettingNumberField: View {
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 6)
-                            .stroke(isFocused ? Color.accentColor : Color.primary.opacity(0.12), lineWidth: isFocused ? 1.5 : 0.5)
+                            .stroke(Color.primary.opacity(0.12), lineWidth: 0.5)
                     )
-                    .focused($isFocused)
-                    .onAppear {
-                        textValue = "\(value)"
-                    }
-                    .onChange(of: value, perform: { newValue in
-                        textValue = "\(newValue)"
-                    })
-                    .onSubmit {
-                        validateAndCommit()
-                    }
-
-                Button(action: { adjustValue(1) }) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 10, weight: .medium))
-                        .frame(width: 20, height: 20)
-                }
-                .buttonStyle(.plain)
-                .foregroundColor(.secondary)
-                .clipShape(RoundedRectangle(cornerRadius: 4))
 
                 if !unit.isEmpty {
                     Text(unit)
@@ -152,22 +126,6 @@ struct SettingNumberField: View {
             isHovered = hovering
         }
     }
-
-    private func adjustValue(_ delta: Int) {
-        let newValue = value + delta
-        value = min(max(newValue, range.lowerBound), range.upperBound)
-        textValue = "\(value)"
-    }
-
-    private func validateAndCommit() {
-        guard let intValue = Int(textValue) else {
-            textValue = "\(value)"
-            return
-        }
-        let clamped = min(max(intValue, range.lowerBound), range.upperBound)
-        value = clamped
-        textValue = "\(clamped)"
-    }
 }
 
 // MARK: - Double Number Field Row
@@ -180,8 +138,6 @@ struct SettingDoubleField: View {
     let step: Double
     let format: String
 
-    @State private var textValue: String = ""
-    @FocusState private var isFocused: Bool
     @State private var isHovered = false
 
     init(title: String, unit: String = "", value: Binding<Double>, range: ClosedRange<Double> = 0...Double.greatestFiniteMagnitude, step: Double = 0.1, format: String = "%.1f") {
@@ -201,20 +157,15 @@ struct SettingDoubleField: View {
 
             Spacer()
 
-            HStack(spacing: 4) {
-                Button(action: { adjustValue(-step) }) {
-                    Image(systemName: "minus")
-                        .font(.system(size: 10, weight: .medium))
-                        .frame(width: 20, height: 20)
-                }
-                .buttonStyle(.plain)
-                .foregroundColor(.secondary)
-                .clipShape(RoundedRectangle(cornerRadius: 4))
+            HStack(spacing: 6) {
+                Stepper("", value: $value, in: range, step: step)
+                    .labelsHidden()
+                    .scaleEffect(0.8)
 
-                TextField("", text: $textValue)
+                TextField("", value: $value, format: .number.precision(.fractionLength(1)))
                     .font(.system(size: 13, weight: .regular))
                     .multilineTextAlignment(.center)
-                    .frame(width: 64, height: 24)
+                    .frame(width: 64)
                     .textFieldStyle(.plain)
                     .background(
                         RoundedRectangle(cornerRadius: 6)
@@ -222,27 +173,8 @@ struct SettingDoubleField: View {
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 6)
-                            .stroke(isFocused ? Color.accentColor : Color.primary.opacity(0.12), lineWidth: isFocused ? 1.5 : 0.5)
+                            .stroke(Color.primary.opacity(0.12), lineWidth: 0.5)
                     )
-                    .focused($isFocused)
-                    .onAppear {
-                        textValue = String(format: format, value)
-                    }
-                    .onChange(of: value, perform: { newValue in
-                        textValue = String(format: format, newValue)
-                    })
-                    .onSubmit {
-                        validateAndCommit()
-                    }
-
-                Button(action: { adjustValue(step) }) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 10, weight: .medium))
-                        .frame(width: 20, height: 20)
-                }
-                .buttonStyle(.plain)
-                .foregroundColor(.secondary)
-                .clipShape(RoundedRectangle(cornerRadius: 4))
 
                 if !unit.isEmpty {
                     Text(unit)
@@ -261,22 +193,6 @@ struct SettingDoubleField: View {
         .onHover { hovering in
             isHovered = hovering
         }
-    }
-
-    private func adjustValue(_ delta: Double) {
-        let newValue = value + delta
-        value = min(max(newValue, range.lowerBound), range.upperBound)
-        textValue = String(format: format, value)
-    }
-
-    private func validateAndCommit() {
-        guard let doubleValue = Double(textValue) else {
-            textValue = String(format: format, value)
-            return
-        }
-        let clamped = min(max(doubleValue, range.lowerBound), range.upperBound)
-        value = clamped
-        textValue = String(format: format, clamped)
     }
 }
 

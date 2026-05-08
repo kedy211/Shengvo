@@ -315,7 +315,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let startTime = CFAbsoluteTimeGetCurrent()
         print("[Timing] 开始 LLM 处理...")
 
-        llmService.processText(text, targetApp: targetAppName) { [weak self] result in
+        // 多轮上下文：如果启用，传入最近 N 轮历史
+        let priorTurns: [(raw: String, polished: String)]
+        if config.conversationContextEnabled, llmService.conversationContext.count > 0 {
+            // 限制轮数不超过配置的最大值
+            let allTurns = llmService.conversationContext.orderedTurns
+            priorTurns = Array(allTurns.suffix(config.conversationContextMaxTurns))
+            print("[LLM] Multi-turn enabled: using \(priorTurns.count) prior turns (max \(config.conversationContextMaxTurns))")
+        } else {
+            priorTurns = []
+        }
+
+        llmService.processText(text, targetApp: targetAppName, priorTurns: priorTurns) { [weak self] result in
             guard let self = self else { return }
 
             let elapsed = CFAbsoluteTimeGetCurrent() - startTime
@@ -325,6 +336,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             case .success(let processedText):
                 print("[Timing] LLM 完成: \(String(format: "%.2f", elapsed))s, 总耗时: \(String(format: "%.2f", totalElapsed))s")
                 print("[Timing] 处理结果: \(processedText)")
+
+                // 多轮上下文：记录本轮对话
+                if config.conversationContextEnabled {
+                    self.llmService.conversationContext.addTurn(raw: text, polished: processedText)
+                }
+
                 self.pasteText(processedText, wasProcessedByLLM: true)
             case .failure(let error):
                 print("[Timing] LLM 失败: \(String(format: "%.2f", elapsed))s, 错误: \(error), 使用原始文本")
@@ -423,10 +440,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         let settingsView = SettingsView()
         let hostingView = NSHostingView(rootView: settingsView)
-        hostingView.frame = NSRect(x: 0, y: 0, width: 620, height: 560)
+        hostingView.frame = NSRect(x: 0, y: 0, width: 620, height: 640)
 
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 620, height: 560),
+            contentRect: NSRect(x: 0, y: 0, width: 620, height: 640),
             styleMask: [.titled, .closable, .miniaturizable],
             backing: .buffered,
             defer: false
