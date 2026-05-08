@@ -13,6 +13,7 @@ struct AppConfig: Codable {
     var asrAppID: String = ""
     var asrAccessToken: String = ""
     var asrSecretKey: String = ""
+    var asrQwenAPIKey: String = "" // 阿里云百炼 Qwen-ASR API Key
     var customWords: [String] = []
 
     // LLM - Volcano Engine Ark

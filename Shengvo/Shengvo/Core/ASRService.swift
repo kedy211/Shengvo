@@ -10,6 +10,8 @@ class ASRService {
         switch AppConfig.shared.asrMode {
         case "cloud":
             recognizeCloud(audioData: audioData, completion: completion)
+        case "qwen_cloud":
+            recognizeQwenCloud(audioData: audioData, completion: completion)
         default:
             recognizeLocal(audioData: audioData, completion: completion)
         }
@@ -201,6 +203,109 @@ class ASRService {
                 let msg = httpResponse.allHeaderFields["X-Api-Message"] as? String ?? "Unknown error"
                 print("[ASR] Query failed: \(msg)")
                 completion(.failure(ASRError.httpError(0, msg)))
+            }
+        }.resume()
+    }
+
+    // MARK: - Cloud (Alibaba Qwen-ASR)
+
+    private func recognizeQwenCloud(audioData: Data, completion: @escaping (Result<String, Error>) -> Void) {
+        let config = AppConfig.shared
+        guard !config.asrQwenAPIKey.isEmpty else {
+            completion(.failure(ASRError.httpError(0, "未配置阿里云 Qwen-ASR API Key")))
+            return
+        }
+
+        let urlString = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
+        guard let url = URL(string: urlString) else {
+            completion(.failure(ASRError.invalidURL))
+            return
+        }
+
+        let base64Audio = audioData.base64EncodedString()
+        let dataURL = "data:audio/wav;base64,\(base64Audio)"
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 30
+        request.addValue("Bearer \(config.asrQwenAPIKey)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        var asrOptions: [String: Any] = [
+            "enable_itn": false
+        ]
+        if !config.customWords.isEmpty {
+            asrOptions["language"] = "zh"
+        }
+
+        let body: [String: Any] = [
+            "model": "qwen3-asr-flash",
+            "messages": [
+                [
+                    "role": "user",
+                    "content": [
+                        [
+                            "type": "input_audio",
+                            "input_audio": [
+                                "data": dataURL
+                            ]
+                        ]
+                    ]
+                ]
+            ],
+            "asr_options": asrOptions
+        ]
+
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+
+        print("[Qwen-ASR] Sending request, audio: \(audioData.count) bytes")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("[Qwen-ASR] Request error: \(error.localizedDescription)")
+                completion(.failure(error))
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                completion(.failure(ASRError.invalidResponse))
+                return
+            }
+
+            print("[Qwen-ASR] Response status: \(httpResponse.statusCode)")
+
+            guard let data = data else {
+                completion(.failure(ASRError.noData))
+                return
+            }
+
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    // OpenAI-compatible format: choices[0].message.content
+                    if let choices = json["choices"] as? [[String: Any]],
+                       let first = choices.first,
+                       let message = first["message"] as? [String: Any],
+                       let content = message["content"] as? String,
+                       !content.isEmpty {
+                        print("[Qwen-ASR] Recognized: \(content)")
+                        completion(.success(content))
+                    }
+                    // API error
+                    else if let errorObj = json["error"] as? [String: Any],
+                            let errorMsg = errorObj["message"] as? String {
+                        print("[Qwen-ASR] API error: \(errorMsg)")
+                        completion(.failure(ASRError.httpError(httpResponse.statusCode, errorMsg)))
+                    }
+                    else {
+                        print("[Qwen-ASR] Empty result")
+                        completion(.failure(ASRError.emptyResult))
+                    }
+                } else {
+                    completion(.failure(ASRError.emptyResult))
+                }
+            } catch {
+                print("[Qwen-ASR] JSON parse error: \(error)")
+                completion(.failure(error))
             }
         }.resume()
     }

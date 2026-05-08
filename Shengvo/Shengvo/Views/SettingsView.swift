@@ -216,10 +216,11 @@ struct SettingsView: View {
                     Spacer()
                     Picker("", selection: $config.asrMode) {
                         Text("本地 (Whisper)").tag("local")
-                        Text("云端 (火山引擎)").tag("cloud")
+                        Text("火山引擎").tag("cloud")
+                        Text("阿里云 Qwen").tag("qwen_cloud")
                     }
                     .pickerStyle(.segmented)
-                    .frame(width: 260)
+                    .frame(width: 380)
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
@@ -242,6 +243,21 @@ struct SettingsView: View {
                     SettingTextField(title: "App ID", placeholder: "火山引擎 App ID", text: $config.asrAppID)
                     SettingTextField(title: "Access Token", placeholder: "Access Token", text: $config.asrAccessToken, isSecure: true)
                     SettingTextField(title: "Secret Key", placeholder: "Secret Key", text: $config.asrSecretKey, isSecure: true)
+                }
+
+                if config.asrMode == "qwen_cloud" {
+                    HStack(spacing: 8) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.system(size: 14))
+                        Text("Qwen3-ASR-Flash，28 语种+16 方言，标点+噪声过滤，≈0.013 元/分钟")
+                            .font(.system(size: 13, weight: .regular))
+                        Spacer()
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 6)
+
+                    SettingTextField(title: "API Key", placeholder: "sk-xxx", text: $config.asrQwenAPIKey, isSecure: true)
                 }
 
                 Divider().padding(.horizontal, 16)

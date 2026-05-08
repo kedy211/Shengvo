@@ -4,7 +4,7 @@ macOS 语音输入法，一键将语音转化为精准文字。
 
 ## 亮点
 
-- **双引擎语音识别**：内置本地 Whisper 模型（离线可用），同时支持火山引擎云端 ASR，一键切换
+- **三引擎语音识别**：内置本地 Whisper 模型（离线可用），同时支持火山引擎云端 ASR 和阿里云 Qwen-ASR，一键切换
 - **LLM 文本整理**：可选启用，自动修正同音错字、补充标点、去除口语冗余。**LLM 完全可自定义** — 支持任何兼容 OpenAI API 的服务（火山引擎、OpenAI、DeepSeek 等），自由选择模型、Base URL 和系统提示词
 - **应用感知**：自动识别当前输入目标应用（微信、邮件、代码编辑器、终端等），根据应用场景智能调整输出风格和语言
 - **自定义识别词**：添加专有名词、术语和人名，由 LLM 在语义层面自动纠正识别错误
@@ -13,6 +13,7 @@ macOS 语音输入法，一键将语音转化为精准文字。
 
 - 本地 Whisper base (q8_0 量化) 引擎，CoreML + Metal 加速，低延迟离线识别
 - 云端火山引擎 ASR 作为可选替代方案
+- 阿里云 Qwen-ASR (Qwen3-ASR-Flash) 云端引擎，SOTA 中文识别准确率，支持 28 语种+16 方言
 - LLM 文本后处理：修正错字、补充标点、去除冗余口癖，保留原始表达风格
 - 20+ 应用场景自动匹配（WeChat、钉钉、飞书、Mail、Xcode、Terminal 等）
 - 通过 Accessibility API 直接向焦点输入框注入文字，不污染剪贴板
@@ -50,8 +51,11 @@ open Shengvo/Shengvo.xcodeproj
 |------|------|----------|
 | **本地 Whisper**（默认） | 离线识别，无需网络，数据不上传 | 无需额外配置 |
 | 云端火山引擎 | 高精度中文识别 | App ID / Access Token / Secret Key |
+| 阿里云 Qwen-ASR | SOTA 中文识别，28 语种+16 方言，标点+噪声过滤 | API Key (百炼) |
 
-> 使用云端引擎需注册 [火山引擎语音识别](https://www.volcengine.com/product/speech-recognition) 并获取凭证。
+> 使用云端引擎需注册对应服务并获取凭证：
+> - 火山引擎：[语音识别](https://www.volcengine.com/product/speech-recognition)
+> - 阿里云 Qwen：[百炼大模型平台](https://bailian.console.aliyun.com/)
 
 ### 大语言模型（LLM）— 可选
 
@@ -117,7 +121,7 @@ Shengvo/
 
 ```
 按下快捷键 → 开始录音 → 松开快捷键
-    → ASR 识别 (本地 Whisper / 云端火山引擎)
+    → ASR 识别 (本地 Whisper / 云端火山引擎 / 阿里云 Qwen-ASR)
     → (可选) LLM 文本整理 + 自定义词纠错
     → 直接注入焦点输入框 → 保存历史记录
 ```
