@@ -5,45 +5,114 @@ struct HotKeyRecorderView: View {
     @Binding var keyCode: UInt32
     @Binding var modifiers: UInt32
     @Binding var usesFn: Bool
+    @Binding var hotKeyMode: String
+    @Binding var hotKeySingleKey: String?
+
     @State private var isRecording = false
     @State private var displayText: String = ""
 
     var body: some View {
-        HStack {
-            Text("快捷键:")
-                .frame(width: 80, alignment: .leading)
-
-            Button(action: {
-                isRecording.toggle()
-                if isRecording {
-                    displayText = "请按下快捷键..."
+        VStack(alignment: .leading, spacing: 12) {
+            // Mode selector
+            HStack(spacing: 8) {
+                Text("触发方式:")
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundColor(.primary)
+                Spacer()
+                Picker("", selection: $hotKeyMode) {
+                    Text("切换模式 (按一下开始，再按一下结束)").tag("toggle")
+                    Text("按住模式 (按住录音，松开结束)").tag("hold")
                 }
-            }) {
-                Text(isRecording ? "按下快捷键..." : formatHotKey())
-                    .frame(minWidth: 120)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(isRecording ? Color.red.opacity(0.1) : Color.gray.opacity(0.1))
-                    .cornerRadius(6)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 6)
-                            .stroke(isRecording ? Color.red : Color.gray.opacity(0.3), lineWidth: 1)
-                    )
+                .pickerStyle(.radioGroup)
+                .labelsHidden()
             }
-            .buttonStyle(.plain)
 
-            if isRecording {
-                Button("取消") {
-                    isRecording = false
-                    displayText = ""
+            // Single key selector
+            HStack(spacing: 8) {
+                Text("热键类型:")
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundColor(.primary)
+                Spacer()
+                Picker("", selection: Binding<String?>(
+                    get: { hotKeySingleKey },
+                    set: { hotKeySingleKey = $0 }
+                )) {
+                    Text("组合键").tag(nil as String?)
+                    Text("Fn").tag("fn" as String?)
+                    Text("Right ⌘").tag("rightCmd" as String?)
+                    Text("Left ⌥").tag("leftOption" as String?)
+                    Text("Right ⌥").tag("rightOption" as String?)
                 }
-                .foregroundColor(.secondary)
+                .pickerStyle(.segmented)
+                .frame(width: 380)
+            }
+
+            // No compatibility notice needed — Right CMD is available on all modern Mac keyboards
+
+            // Combination key recorder (only when single key is NOT selected)
+            if hotKeySingleKey == nil {
+                HStack {
+                    Text("快捷键:")
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(.primary)
+
+                    Button(action: {
+                        isRecording.toggle()
+                        if isRecording {
+                            displayText = "请按下快捷键..."
+                        }
+                    }) {
+                        Text(isRecording ? "按下快捷键..." : formatHotKey())
+                            .frame(minWidth: 120)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(isRecording ? Color.red.opacity(0.1) : Color.gray.opacity(0.1))
+                            .cornerRadius(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(isRecording ? Color.red : Color.gray.opacity(0.3), lineWidth: 1)
+                            )
+                    }
+                    .buttonStyle(.plain)
+
+                    if isRecording {
+                        Button("取消") {
+                            isRecording = false
+                            displayText = ""
+                        }
+                        .foregroundColor(.secondary)
+                    }
+                }
+                .background(
+                    HotKeyCaptureView(isRecording: $isRecording, keyCode: $keyCode, modifiers: $modifiers, usesFn: $usesFn)
+                        .frame(width: 0, height: 0)
+                )
+            }
+
+            // Visual hint for current mode
+            if hotKeySingleKey != nil {
+                HStack(spacing: 6) {
+                    Image(systemName: hotKeyMode == "hold" ? "hand.draw" : "hand.point.up")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                    Text(hotKeyMode == "hold"
+                         ? "按住 \(singleKeyLabel(hotKeySingleKey)) 开始录音，松开停止"
+                         : "按下 \(singleKeyLabel(hotKeySingleKey)) 开始/停止录音")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.secondary)
+                }
             }
         }
-        .background(
-            HotKeyCaptureView(isRecording: $isRecording, keyCode: $keyCode, modifiers: $modifiers, usesFn: $usesFn)
-                .frame(width: 0, height: 0)
-        )
+    }
+
+    private func singleKeyLabel(_ key: String?) -> String {
+        switch key {
+        case "fn": return "Fn"
+        case "rightCmd": return "Right ⌘"
+        case "leftOption": return "Left ⌥"
+        case "rightOption": return "Right ⌥"
+        default: return ""
+        }
     }
 
     private func formatHotKey() -> String {
@@ -187,16 +256,11 @@ class HotKeyCaptureNSView: NSView {
 
         hasKeyDown = false
 
-        // Update fn state: detect by both keycode 0x3F and .function flag
         if event.keyCode == fnKeyCode {
             fnPressed = event.modifierFlags.contains(.function)
         }
-        // Also check .function flag on any flagsChanged event (some keyboards report fn this way)
         if event.modifierFlags.contains(.function) {
             fnPressed = true
-        } else if event.keyCode != fnKeyCode {
-            // Only clear fn if the event is NOT about fn key itself
-            // Don't clear on non-fn modifier events — fn might still be held
         }
 
         let hasCmd = event.modifierFlags.contains(.command)
@@ -205,7 +269,6 @@ class HotKeyCaptureNSView: NSView {
         let hasOption = event.modifierFlags.contains(.option)
         let hasAnyStandardModifier = hasCmd || hasShift || hasCtrl || hasOption
 
-        // Current fn state: either tracked or directly from this event's flags
         let currentFn = fnPressed || event.modifierFlags.contains(.function)
 
         modifierOnlyWorkItem?.cancel()
@@ -229,7 +292,6 @@ class HotKeyCaptureNSView: NSView {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: workItem)
         }
 
-        // If fn released, clear state
         if event.keyCode == fnKeyCode && !event.modifierFlags.contains(.function) {
             fnPressed = false
         }

@@ -20,6 +20,11 @@ targets:
     platform: macOS
     sources:
       - path: Shengvo
+        excludes:
+          - "**/whisper.xcframework"
+    dependencies:
+      - framework: Shengvo/whisper.xcframework
+        embed: true
     info:
       path: Shengvo/App/Info.plist
       properties:
@@ -34,7 +39,14 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.shengvo.app
         INFOPLIST_FILE: Shengvo/App/Info.plist
-        CODE_SIGN_IDENTITY: "-"
-        CODE_SIGN_STYLE: Manual
         ENABLE_HARDENED_RUNTIME: false
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SWIFT_OBJC_BRIDGING_HEADER: "$(SRCROOT)/Shengvo/Core/SQLite/sqlite_bridge.h"
+        OTHER_LINKER_FLAGS: "-lsqlite3 -framework Speech"
+      configs:
+        Debug:
+          CODE_SIGN_IDENTITY: "Apple Development"
+          CODE_SIGN_STYLE: Automatic
+        Release:
+          CODE_SIGN_IDENTITY: "-"
+          CODE_SIGN_STYLE: Manual

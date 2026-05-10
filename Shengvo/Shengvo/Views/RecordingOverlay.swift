@@ -121,14 +121,25 @@ struct OverlayContentView: View {
         .padding(.vertical, 8)
         .background(
             ZStack {
-                Color.black.opacity(0.45)
-                VisualEffectView(material: .hudWindow, blendingMode: .withinWindow)
+                VisualEffectView(material: .hudWindow, blendingMode: .behindWindow)
+                LinearGradient(
+                    colors: [Color.white.opacity(0.05), Color.cyan.opacity(0.03)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
             }
         )
         .clipShape(RoundedRectangle(cornerRadius: 17))
         .overlay(
             RoundedRectangle(cornerRadius: 17)
-                .stroke(Color.white.opacity(0.4), lineWidth: 0.8)
+                .stroke(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.5), Color.cyan.opacity(0.15), Color.white.opacity(0.2)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 0.8
+                )
         )
         .frame(width: 128, height: 35)
         .onReceive(timer) { _ in

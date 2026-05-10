@@ -56,7 +56,7 @@ struct SettingToggleRow: View {
         .frame(height: subtitle != nil ? 52 : 40)
         .background(
             RoundedRectangle(cornerRadius: 6)
-                .fill(isHovered ? Color.primary.opacity(0.04) : Color.clear)
+                .fill(isHovered ? Color.white.opacity(0.06) : Color.clear)
         )
         .onHover { hovering in
             isHovered = hovering
@@ -101,7 +101,7 @@ struct SettingNumberField: View {
                     .textFieldStyle(.plain)
                     .background(
                         RoundedRectangle(cornerRadius: 6)
-                            .fill(Color(nsColor: .textBackgroundColor))
+                            .fill(.thinMaterial)
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 6)
@@ -120,7 +120,7 @@ struct SettingNumberField: View {
         .frame(height: 40)
         .background(
             RoundedRectangle(cornerRadius: 6)
-                .fill(isHovered ? Color.primary.opacity(0.04) : Color.clear)
+                .fill(isHovered ? Color.white.opacity(0.06) : Color.clear)
         )
         .onHover { hovering in
             isHovered = hovering
@@ -169,7 +169,7 @@ struct SettingDoubleField: View {
                     .textFieldStyle(.plain)
                     .background(
                         RoundedRectangle(cornerRadius: 6)
-                            .fill(Color(nsColor: .textBackgroundColor))
+                            .fill(.thinMaterial)
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 6)
@@ -188,7 +188,7 @@ struct SettingDoubleField: View {
         .frame(height: 40)
         .background(
             RoundedRectangle(cornerRadius: 6)
-                .fill(isHovered ? Color.primary.opacity(0.04) : Color.clear)
+                .fill(isHovered ? Color.white.opacity(0.06) : Color.clear)
         )
         .onHover { hovering in
             isHovered = hovering
@@ -236,7 +236,7 @@ struct SettingTextField: View {
             .padding(.horizontal, 8)
             .background(
                 RoundedRectangle(cornerRadius: 6)
-                    .fill(Color(nsColor: .textBackgroundColor))
+                    .fill(.thinMaterial)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 6)
@@ -249,7 +249,7 @@ struct SettingTextField: View {
         .frame(height: 40)
         .background(
             RoundedRectangle(cornerRadius: 6)
-                .fill(isHovered ? Color.primary.opacity(0.04) : Color.clear)
+                .fill(isHovered ? Color.white.opacity(0.06) : Color.clear)
         )
         .onHover { hovering in
             isHovered = hovering

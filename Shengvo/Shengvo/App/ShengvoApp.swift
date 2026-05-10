@@ -34,6 +34,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var targetAppName: String?
     private var lastRawText: String = ""
     private var currentAudioFilename: String?
+    private var asrDurationMs: Int = 0
+    private var llmDurationMs: Int = 0
+    private var asrModeUsed: String = ""
 
     // MARK: - App Lifecycle
 
@@ -123,19 +126,52 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func setupHotKey() {
         hotKeyManager = HotKeyManager()
+        applyHotKeyConfig()
+    }
+
+    private func applyHotKeyConfig() {
         let config = AppConfig.shared
 
-        if config.hotKeyUsesFn {
-            // Use CGEvent tap for fn key combinations
-            hotKeyManager.startFnEventTap(
+        if config.hotKeySingleKey != nil {
+            // Single modifier key: always use CGEvent tap
+            hotKeyManager.startEventTap(
                 keyCode: config.hotKeyKeyCode,
                 modifiers: config.hotKeyModifiers,
-                onTrigger: { [weak self] _, _ in
-                    self?.toggleRecording()
+                mode: config.hotKeyMode,
+                singleKey: config.hotKeySingleKey,
+                onKeyDown: { [weak self] in
+                    self?.startRecording()
+                },
+                onKeyUp: { [weak self] in
+                    if self?.audioRecorder.isRecording == true {
+                        self?.stopRecordingAndProcess()
+                    }
+                }
+            )
+        } else if config.hotKeyUsesFn {
+            // fn + standard modifiers via CGEvent tap (legacy support)
+            hotKeyManager.startEventTap(
+                keyCode: config.hotKeyKeyCode,
+                modifiers: config.hotKeyModifiers,
+                mode: config.hotKeyMode,
+                singleKey: "fn",
+                onKeyDown: { [weak self] in
+                    if config.hotKeyMode == "hold" {
+                        self?.startRecording()
+                    } else {
+                        self?.toggleRecording()
+                    }
+                },
+                onKeyUp: { [weak self] in
+                    if config.hotKeyMode == "hold" {
+                        if self?.audioRecorder.isRecording == true {
+                            self?.stopRecordingAndProcess()
+                        }
+                    }
                 }
             )
         } else {
-            // Use Carbon for standard modifier combinations
+            // Standard modifier combination via Carbon HotKey
             hotKeyManager.registerHotKey(
                 keyCode: config.hotKeyKeyCode,
                 modifiers: config.hotKeyModifiers,
@@ -286,11 +322,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             let totalElapsed = CFAbsoluteTimeGetCurrent() - self.processStartTime
 
             switch result {
-            case .success(let text):
+            case .success(let (text, engineUsed)):
                 let elapsedMs = Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000)
-                print("[Timing] ASR 完成: \(String(format: "%.2f", CFAbsoluteTimeGetCurrent() - startTime))s, 总耗时: \(String(format: "%.2f", totalElapsed))s")
+                self.asrDurationMs = elapsedMs
+                self.asrModeUsed = engineUsed
+                if engineUsed != AppConfig.shared.asrMode {
+                    self.updateMenuStatus("已使用备选引擎")
+                }
+                print("[Timing] ASR 完成(\(engineUsed)): \(String(format: "%.2f", CFAbsoluteTimeGetCurrent() - startTime))s, 总耗时: \(String(format: "%.2f", totalElapsed))s")
                 print("[Timing] 识别结果: \(text)")
-                AppLogger.shared.logASR(mode: AppConfig.shared.asrMode, inputSize: audioData.count, output: text, durationMs: elapsedMs)
+                AppLogger.shared.logASR(mode: engineUsed, inputSize: audioData.count, output: text, durationMs: elapsedMs)
                 self.processTextWithLLM(text)
             case .failure(let error):
                 print("[Timing] ASR 失败: \(String(format: "%.2f", elapsed))s, 错误: \(error)")
@@ -344,6 +385,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
             switch result {
             case .success(let processedText):
+                let elapsedMs = Int(elapsed * 1000)
+                self.llmDurationMs = elapsedMs
                 print("[Timing] LLM 完成: \(String(format: "%.2f", elapsed))s, 总耗时: \(String(format: "%.2f", totalElapsed))s")
                 print("[Timing] 处理结果: \(processedText)")
 
@@ -355,6 +398,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 self.pasteText(processedText, wasProcessedByLLM: true)
             case .failure(let error):
                 print("[Timing] LLM 失败: \(String(format: "%.2f", elapsed))s, 错误: \(error), 使用原始文本")
+                self.llmDurationMs = 0
                 self.pasteText(text, wasProcessedByLLM: false)
             }
         }
@@ -368,13 +412,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         print("[App] Accessibility: \(clipboardManager.checkAccessibility() ? "GRANTED" : "NOT GRANTED")")
 
         // Save to history
+        let totalMs = Int((CFAbsoluteTimeGetCurrent() - processStartTime) * 1000)
         let entry = HistoryEntry(
             text: text,
             rawText: lastRawText,
             timestamp: Date(),
             targetApp: targetAppName,
             wasProcessedByLLM: wasProcessedByLLM,
-            audioFilename: currentAudioFilename
+            audioFilename: currentAudioFilename,
+            asrMode: asrModeUsed,
+            asrDurationMs: asrDurationMs,
+            llmDurationMs: llmDurationMs,
+            totalDurationMs: totalMs
         )
         currentAudioFilename = nil
         HistoryManager.shared.addEntry(entry)
@@ -396,6 +445,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func resetState() {
         isProcessing = false
+        asrDurationMs = 0
+        llmDurationMs = 0
+        asrModeUsed = ""
         updateStatusIcon(state: .idle)
         updateMenuStatus("就绪")
         overlay.hide()
@@ -452,16 +504,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         let settingsView = SettingsView()
         let hostingView = NSHostingView(rootView: settingsView)
-        hostingView.frame = NSRect(x: 0, y: 0, width: 620, height: 640)
+        hostingView.frame = NSRect(x: 0, y: 0, width: 620, height: 700)
 
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 620, height: 640),
-            styleMask: [.titled, .closable, .miniaturizable],
+            contentRect: NSRect(x: 0, y: 0, width: 620, height: 700),
+            styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView],
             backing: .buffered,
             defer: false
         )
         window.contentView = hostingView
         window.title = "晟语 设置"
+        window.titlebarAppearsTransparent = true
+        window.isOpaque = false
+        window.backgroundColor = .clear
         window.isReleasedWhenClosed = false
         window.center()
         window.delegate = self
@@ -502,24 +557,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     @objc private func handleSettingsChange() {
         let config = AppConfig.shared
 
-        // Ensure hotKeyManager exists (may not have been created on launch if accessibility wasn't granted)
         if hotKeyManager == nil {
             hotKeyManager = HotKeyManager()
         } else {
             hotKeyManager.unregisterAll()
         }
 
-        if config.hotKeyUsesFn {
-            hotKeyManager.startFnEventTap(
-                keyCode: config.hotKeyKeyCode,
-                modifiers: config.hotKeyModifiers,
-                onTrigger: { [weak self] _, _ in
-                    self?.toggleRecording()
-                }
-            )
-        } else {
-            hotKeyManager.updateHotKey(keyCode: config.hotKeyKeyCode, modifiers: config.hotKeyModifiers)
-        }
+        applyHotKeyConfig()
 
         print("[App] Hotkey updated: \(config.hotKeyDescription)")
     }

@@ -3,45 +3,49 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		251F34FE0613D34095CC1A0C /* HotKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953DE692FD81B33E8D4BE967 /* HotKeyManager.swift */; };
-		3354CDB6F6BA4EAD1C27E5DA /* whisper.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E5DD7DD102A3E45C57BA198 /* whisper.xcframework */; };
-		35DB58185865B5412231D490 /* HistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC6E6F2D5F7ED01CE9FF2B17 /* HistoryManager.swift */; };
-		3BE652F2708DECC0E8F02269 /* ClipboardManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 041AE412D86B68FE9E00B959 /* ClipboardManager.swift */; };
-		41E05F3AB4FFC88EC87A314E /* CustomWordsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4D251A1F8BE2E704507667 /* CustomWordsView.swift */; };
-		5B8D56432C67E1FD87DC02CB /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FEF819AFDA11F60CC33E395 /* SettingsView.swift */; };
-		64A1E70A0AF4878EE3A5C674 /* LLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181F9A661514C897A4AB3FE9 /* LLMService.swift */; };
-		80845358B93321BFA6EB04A9 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0EE9D44E120CD956A9F73CD /* AppConfig.swift */; };
-		8459FE87086708576E8B18A5 /* ShengvoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B708BAA8F982A05876C7CD1 /* ShengvoApp.swift */; };
-		87898FB55B896D3361DCA63C /* ASRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A4F8399970E678C4963379 /* ASRService.swift */; };
-		8B4D3AA0FE299F863A386F00 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D91B60F1DA742F411AF112 /* AudioRecorder.swift */; };
-		D1E2F3A4B5C6D7E8F9A0B1C2 /* ModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D6E7F8A9B0C1D2 /* ModelManager.swift */; };
-		9E46E54F4B7EF8C39102D777 /* HistoryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80C91269A2DE8974D494D99C /* HistoryEntry.swift */; };
-		C353587D7ACF3C8CDD744C02 /* whisper.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9E5DD7DD102A3E45C57BA198 /* whisper.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		C6C0B6FA685ED1E462823CD0 /* SettingComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93A92FF31DB2B150A7F0EAD2 /* SettingComponents.swift */; };
-		C78E6F6B32D0925FB9A13833 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = B29DC30B3CC02B96B73A64C7 /* AppLogger.swift */; };
-		CCBBC81E1927BE097A1F9673 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99BB47A3EB03FD8F02F9EAEB /* HistoryView.swift */; };
-		CFB1A2318DCC67CC59A75A4E /* RecordingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD3C419C34393D8DDE0AEAB /* RecordingOverlay.swift */; };
-		D24D55351033699BF4C60F48 /* HotKeyRecorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30EBEE64D57796F16BF390D /* HotKeyRecorderView.swift */; };
-		D5DCA0CC3880C465C172C2E9 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE0DD8551BA62066D51B2D0F /* SoundManager.swift */; };
-		D6C06341A9B45B4ABDEF883C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E3B8613233AE798AD0215C76 /* Assets.xcassets */; };
-		E0C200FED4F67E4AF8007F01 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F46DBC7BD8EC4D1264A4FCCF /* SetupView.swift */; };
-		F7829B241469BC9EF0E40A77 /* ASRResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B450C05C7FCDC0AB1E4B3DC3 /* ASRResponse.swift */; };
-		A1B2C3D4E5F6A7B8C9D0E1F2 /* PromptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3C4D5E6F7A8B9C0D1E2F3A4 /* PromptManager.swift */; };
-		B2C3D4E5F6A7B8C9D0E1F2A3 /* ConversationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5D6E7F8A9B0C1D2E3F4A5B6 /* ConversationContext.swift */; };
+		0963FD4D4303D6F9FEE5B842 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70EDF781A1BA304B013BE22 /* SettingsView.swift */; };
+		1250B42BDB0A900C381CF7F5 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DE1D89AAFE3ED82F233BE6 /* SoundManager.swift */; };
+		1491DC6D00453B98F87DCF29 /* ModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36A6D17219C05740DF5B20B7 /* ModelManager.swift */; };
+		1719EBF76C3B3FA58B9BA1E8 /* HistoryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AECEE82CAA9AFEE2114795 /* HistoryEntry.swift */; };
+		2829D176A16A4ED4AC04D0E7 /* SettingComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77305DDDFBF53C3E70E01834 /* SettingComponents.swift */; };
+		28FB3B0B10EE067D2DCB7620 /* LLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE56DE609E710ED29E43D230 /* LLMService.swift */; };
+		32E257E251D4D8CA14486F2D /* HotKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA95331D4855476475CE19B /* HotKeyManager.swift */; };
+		3754A15154F517E27247204C /* AppleSpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1421A8E713EEFEAB1244A4 /* AppleSpeechRecognizer.swift */; };
+		37A860E5BA42D2D44983A269 /* HistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C045102C0C51290424DCC6B9 /* HistoryManager.swift */; };
+		48A3225D3075C577C6E8AEF3 /* ClipboardManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1ACA10FA7E44B35A54EE8A /* ClipboardManager.swift */; };
+		63AE60A723CE3BF9AF76F763 /* ConversationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 085B8F33C0BBB16A824F8F4F /* ConversationContext.swift */; };
+		6E261E6B8D52ABEF09D2BF4B /* CustomWordsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED7E2290A1BDD8007AA7439 /* CustomWordsView.swift */; };
+		70CD8A8F91ED2A21966B2103 /* HotKeyRecorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90ED8B77A4E5BF4442BBE248 /* HotKeyRecorderView.swift */; };
+		736CEC1F092120CC49D38B3C /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DA809458C49D510551075F /* HistoryView.swift */; };
+		77B7EA197D5C54CB0A2208A5 /* RecordingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = B26A4EC782C0BCC51F09EFCF /* RecordingOverlay.swift */; };
+		7918890EB0A247A00670BD09 /* DatabaseQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 729070C8DC5FAC79CBD184DF /* DatabaseQueue.swift */; };
+		7FDF149A348CC3D644FC21C7 /* ASRResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05FCC1D890BF8F7ECE625B34 /* ASRResponse.swift */; };
+		816EE5A21AE43A7D4AD4EC5B /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E002D2129995925D90E0DF58 /* AppConfig.swift */; };
+		83E37FE663C75B6758664D4C /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C09AD172326907D6F488AA /* AppLogger.swift */; };
+		8633C2D5B4EDCEEC33AFF797 /* whisper.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = EA70B0C25BDB500D7C4BB02D /* whisper.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		96C014DC1AFE97A29F226155 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4079616F647BF7EEEAE0468B /* AudioRecorder.swift */; };
+		BAEF24995783F1013064A7EE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F9DC3A2A894572DFCF1B1480 /* Assets.xcassets */; };
+		C060EF4CA10F3526088561EC /* ggml-base-q8_0.bin in Resources */ = {isa = PBXBuildFile; fileRef = 90B20827CEC4C6F11E68DAD3 /* ggml-base-q8_0.bin */; };
+		C30CF0631ACA633C0581A705 /* PromptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1E0044BF0C757A0D5403B8 /* PromptManager.swift */; };
+		D1F4AE71F367066EA46040BE /* whisper.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = EA70B0C25BDB500D7C4BB02D /* whisper.xcframework */; };
+		D8C5918C08CE65DF7A483B2D /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A504292CEDA17414B8729E92 /* SetupView.swift */; };
+		E3EE38D61A8DA7E13AD3D61A /* ASRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38ED9F322B212CEC84E23288 /* ASRService.swift */; };
+		E7A8912FBDFBEC16BEECC1ED /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36F8692473F29078D570176B /* ExportService.swift */; };
+		F10F353256A23FECA4EA95E3 /* ShengvoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44D2EABDEA9FE748CC496BC /* ShengvoApp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		D13A4F04F690FEE9C6BBF5F4 /* Embed Frameworks */ = {
+		9CA4941CD754452FA420B5CF /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				C353587D7ACF3C8CDD744C02 /* whisper.xcframework in Embed Frameworks */,
+				8633C2D5B4EDCEEC33AFF797 /* whisper.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -49,172 +53,199 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		041AE412D86B68FE9E00B959 /* ClipboardManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardManager.swift; sourceTree = "<group>"; };
-		0B708BAA8F982A05876C7CD1 /* ShengvoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShengvoApp.swift; sourceTree = "<group>"; };
-		0D4D251A1F8BE2E704507667 /* CustomWordsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomWordsView.swift; sourceTree = "<group>"; };
-		181F9A661514C897A4AB3FE9 /* LLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMService.swift; sourceTree = "<group>"; };
-		4731E6D03EE739D36394D349 /* Shengvo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Shengvo.entitlements; sourceTree = "<group>"; };
-		E1F2A3B4C5D6E7F8A9B0C1D2 /* ModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManager.swift; sourceTree = "<group>"; };
-		80C91269A2DE8974D494D99C /* HistoryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryEntry.swift; sourceTree = "<group>"; };
-		8FEF819AFDA11F60CC33E395 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		93A92FF31DB2B150A7F0EAD2 /* SettingComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingComponents.swift; sourceTree = "<group>"; };
-		953DE692FD81B33E8D4BE967 /* HotKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyManager.swift; sourceTree = "<group>"; };
-		99BB47A3EB03FD8F02F9EAEB /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
-		9E5DD7DD102A3E45C57BA198 /* whisper.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = wrapper.xcframework; path = Shengvo/whisper.xcframework; sourceTree = SOURCE_ROOT; };
-		A1A4F8399970E678C4963379 /* ASRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASRService.swift; sourceTree = "<group>"; };
-		A2D91B60F1DA742F411AF112 /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
-		A32BB963BE2685D5364B725F /* Shengvo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Shengvo.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		B29DC30B3CC02B96B73A64C7 /* AppLogger.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
-		B450C05C7FCDC0AB1E4B3DC3 /* ASRResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASRResponse.swift; sourceTree = "<group>"; };
-		BE0DD8551BA62066D51B2D0F /* SoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundManager.swift; sourceTree = "<group>"; };
-		C0EE9D44E120CD956A9F73CD /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
-		D9567AA0F135D9ED87321B65 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		E3B8613233AE798AD0215C76 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		F30EBEE64D57796F16BF390D /* HotKeyRecorderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyRecorderView.swift; sourceTree = "<group>"; };
-		F46DBC7BD8EC4D1264A4FCCF /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
-		FC6E6F2D5F7ED01CE9FF2B17 /* HistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryManager.swift; sourceTree = "<group>"; };
-		FCD3C419C34393D8DDE0AEAB /* RecordingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingOverlay.swift; sourceTree = "<group>"; };
-		B3C4D5E6F7A8B9C0D1E2F3A4 /* PromptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptManager.swift; sourceTree = "<group>"; };
-		C5D6E7F8A9B0C1D2E3F4A5B6 /* ConversationContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationContext.swift; sourceTree = "<group>"; };
+		05FCC1D890BF8F7ECE625B34 /* ASRResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASRResponse.swift; sourceTree = "<group>"; };
+		085B8F33C0BBB16A824F8F4F /* ConversationContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationContext.swift; sourceTree = "<group>"; };
+		2F7C89776C6A8CA1E5B7008E /* sqlite3.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sqlite3.h; sourceTree = "<group>"; };
+		36A6D17219C05740DF5B20B7 /* ModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManager.swift; sourceTree = "<group>"; };
+		36F8692473F29078D570176B /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
+		38ED9F322B212CEC84E23288 /* ASRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASRService.swift; sourceTree = "<group>"; };
+		4079616F647BF7EEEAE0468B /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
+		45DE1D89AAFE3ED82F233BE6 /* SoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundManager.swift; sourceTree = "<group>"; };
+		49C09AD172326907D6F488AA /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
+		56AECEE82CAA9AFEE2114795 /* HistoryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryEntry.swift; sourceTree = "<group>"; };
+		59DF67251B3CCCF11D4DECCB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		5C1421A8E713EEFEAB1244A4 /* AppleSpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSpeechRecognizer.swift; sourceTree = "<group>"; };
+		5C1ACA10FA7E44B35A54EE8A /* ClipboardManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardManager.swift; sourceTree = "<group>"; };
+		729070C8DC5FAC79CBD184DF /* DatabaseQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseQueue.swift; sourceTree = "<group>"; };
+		77305DDDFBF53C3E70E01834 /* SettingComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingComponents.swift; sourceTree = "<group>"; };
+		8E1E0044BF0C757A0D5403B8 /* PromptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptManager.swift; sourceTree = "<group>"; };
+		8EEC08D4B1494277369FDC8C /* sqlite_bridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sqlite_bridge.h; sourceTree = "<group>"; };
+		90B20827CEC4C6F11E68DAD3 /* ggml-base-q8_0.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = "ggml-base-q8_0.bin"; sourceTree = "<group>"; };
+		90ED8B77A4E5BF4442BBE248 /* HotKeyRecorderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyRecorderView.swift; sourceTree = "<group>"; };
+		A4CE53C7B7F24C2DC2A61754 /* Shengvo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Shengvo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A504292CEDA17414B8729E92 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
+		B26A4EC782C0BCC51F09EFCF /* RecordingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingOverlay.swift; sourceTree = "<group>"; };
+		B70EDF781A1BA304B013BE22 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		C045102C0C51290424DCC6B9 /* HistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryManager.swift; sourceTree = "<group>"; };
+		D3DA809458C49D510551075F /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		D44D2EABDEA9FE748CC496BC /* ShengvoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShengvoApp.swift; sourceTree = "<group>"; };
+		D48D93BA374C2D67F26D836F /* Shengvo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Shengvo.entitlements; sourceTree = "<group>"; };
+		DAA95331D4855476475CE19B /* HotKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyManager.swift; sourceTree = "<group>"; };
+		DE56DE609E710ED29E43D230 /* LLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMService.swift; sourceTree = "<group>"; };
+		DED7E2290A1BDD8007AA7439 /* CustomWordsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomWordsView.swift; sourceTree = "<group>"; };
+		E002D2129995925D90E0DF58 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
+		EA70B0C25BDB500D7C4BB02D /* whisper.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = whisper.xcframework; path = Shengvo/whisper.xcframework; sourceTree = "<group>"; };
+		F4282BD7B3DA34B2C8452F5A /* module.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
+		F9DC3A2A894572DFCF1B1480 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		0C1BE95EC297B83706620FBA /* Frameworks */ = {
+		FDC0190B398FCD8AA21D2AB1 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3354CDB6F6BA4EAD1C27E5DA /* whisper.xcframework in Frameworks */,
+				D1F4AE71F367066EA46040BE /* whisper.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0CA790D9EF8AE7E9E8A5D717 /* Products */ = {
+		1249792F58964A336264613A /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				A32BB963BE2685D5364B725F /* Shengvo.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		404137515C3889A29CD8CAA7 /* Core */ = {
-			isa = PBXGroup;
-			children = (
-				A1A4F8399970E678C4963379 /* ASRService.swift */,
-				A2D91B60F1DA742F411AF112 /* AudioRecorder.swift */,
-				041AE412D86B68FE9E00B959 /* ClipboardManager.swift */,
-				FC6E6F2D5F7ED01CE9FF2B17 /* HistoryManager.swift */,
-				953DE692FD81B33E8D4BE967 /* HotKeyManager.swift */,
-				E1F2A3B4C5D6E7F8A9B0C1D2 /* ModelManager.swift */,
-					181F9A661514C897A4AB3FE9 /* LLMService.swift */,
-				BE0DD8551BA62066D51B2D0F /* SoundManager.swift */,
-				9E5DD7DD102A3E45C57BA198 /* whisper.xcframework */,
-				B29DC30B3CC02B96B73A64C7 /* AppLogger.swift */,
-				B3C4D5E6F7A8B9C0D1E2F3A4 /* PromptManager.swift */,
-				C5D6E7F8A9B0C1D2E3F4A5B6 /* ConversationContext.swift */,
-			);
-			path = Core;
-			sourceTree = "<group>";
-		};
-		7CEDB23FE7281B946F2AA0A0 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				C0EE9D44E120CD956A9F73CD /* AppConfig.swift */,
-				B450C05C7FCDC0AB1E4B3DC3 /* ASRResponse.swift */,
-				80C91269A2DE8974D494D99C /* HistoryEntry.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
-		8C2266E69DB8D72668BA6F67 = {
-			isa = PBXGroup;
-			children = (
-				C88C74908E57FBA0507E65F0 /* Shengvo */,
-				0CA790D9EF8AE7E9E8A5D717 /* Products */,
-			);
-			sourceTree = "<group>";
-		};
-		C88C74908E57FBA0507E65F0 /* Shengvo */ = {
-			isa = PBXGroup;
-			children = (
-				4731E6D03EE739D36394D349 /* Shengvo.entitlements */,
-				CF9313599A063614C1887613 /* App */,
-				404137515C3889A29CD8CAA7 /* Core */,
-				7CEDB23FE7281B946F2AA0A0 /* Models */,
-				FB5B78FBFF91669B9A542B02 /* Resources */,
-				DA444B1AFA9F4C61D63D375F /* Views */,
-			);
-			path = Shengvo;
-			sourceTree = "<group>";
-		};
-		CF9313599A063614C1887613 /* App */ = {
-			isa = PBXGroup;
-			children = (
-				D9567AA0F135D9ED87321B65 /* Info.plist */,
-				0B708BAA8F982A05876C7CD1 /* ShengvoApp.swift */,
-			);
-			path = App;
-			sourceTree = "<group>";
-		};
-		DA444B1AFA9F4C61D63D375F /* Views */ = {
-			isa = PBXGroup;
-			children = (
-				0D4D251A1F8BE2E704507667 /* CustomWordsView.swift */,
-				99BB47A3EB03FD8F02F9EAEB /* HistoryView.swift */,
-				F30EBEE64D57796F16BF390D /* HotKeyRecorderView.swift */,
-				FCD3C419C34393D8DDE0AEAB /* RecordingOverlay.swift */,
-				93A92FF31DB2B150A7F0EAD2 /* SettingComponents.swift */,
-				8FEF819AFDA11F60CC33E395 /* SettingsView.swift */,
-				F46DBC7BD8EC4D1264A4FCCF /* SetupView.swift */,
+				DED7E2290A1BDD8007AA7439 /* CustomWordsView.swift */,
+				D3DA809458C49D510551075F /* HistoryView.swift */,
+				90ED8B77A4E5BF4442BBE248 /* HotKeyRecorderView.swift */,
+				B26A4EC782C0BCC51F09EFCF /* RecordingOverlay.swift */,
+				77305DDDFBF53C3E70E01834 /* SettingComponents.swift */,
+				B70EDF781A1BA304B013BE22 /* SettingsView.swift */,
+				A504292CEDA17414B8729E92 /* SetupView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
 		};
-		FB5B78FBFF91669B9A542B02 /* Resources */ = {
+		1B1252D42F2CF2748E3BA338 /* SQLite */ = {
 			isa = PBXGroup;
 			children = (
-				E3B8613233AE798AD0215C76 /* Assets.xcassets */,
+				729070C8DC5FAC79CBD184DF /* DatabaseQueue.swift */,
+				F4282BD7B3DA34B2C8452F5A /* module.modulemap */,
+				8EEC08D4B1494277369FDC8C /* sqlite_bridge.h */,
+				2F7C89776C6A8CA1E5B7008E /* sqlite3.h */,
+			);
+			path = SQLite;
+			sourceTree = "<group>";
+		};
+		2878AB2A35BE7DF4A9A1D6BB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A4CE53C7B7F24C2DC2A61754 /* Shengvo.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		387738A89B92489E70B46276 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				5C1421A8E713EEFEAB1244A4 /* AppleSpeechRecognizer.swift */,
+				49C09AD172326907D6F488AA /* AppLogger.swift */,
+				38ED9F322B212CEC84E23288 /* ASRService.swift */,
+				4079616F647BF7EEEAE0468B /* AudioRecorder.swift */,
+				5C1ACA10FA7E44B35A54EE8A /* ClipboardManager.swift */,
+				085B8F33C0BBB16A824F8F4F /* ConversationContext.swift */,
+				36F8692473F29078D570176B /* ExportService.swift */,
+				C045102C0C51290424DCC6B9 /* HistoryManager.swift */,
+				DAA95331D4855476475CE19B /* HotKeyManager.swift */,
+				DE56DE609E710ED29E43D230 /* LLMService.swift */,
+				36A6D17219C05740DF5B20B7 /* ModelManager.swift */,
+				8E1E0044BF0C757A0D5403B8 /* PromptManager.swift */,
+				45DE1D89AAFE3ED82F233BE6 /* SoundManager.swift */,
+				1B1252D42F2CF2748E3BA338 /* SQLite */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		82C75B4AFF214B78B9B490A2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				EA70B0C25BDB500D7C4BB02D /* whisper.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		8EE7980A1EF31D16911D3995 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				F9DC3A2A894572DFCF1B1480 /* Assets.xcassets */,
+				90B20827CEC4C6F11E68DAD3 /* ggml-base-q8_0.bin */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		AAEE972D41C9F5FEB18B1E9B = {
+			isa = PBXGroup;
+			children = (
+				B4AAA1EA1627F34FD74C7B03 /* Shengvo */,
+				82C75B4AFF214B78B9B490A2 /* Frameworks */,
+				2878AB2A35BE7DF4A9A1D6BB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AF5287257D3A95AD5555360F /* App */ = {
+			isa = PBXGroup;
+			children = (
+				59DF67251B3CCCF11D4DECCB /* Info.plist */,
+				D44D2EABDEA9FE748CC496BC /* ShengvoApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		B4AAA1EA1627F34FD74C7B03 /* Shengvo */ = {
+			isa = PBXGroup;
+			children = (
+				D48D93BA374C2D67F26D836F /* Shengvo.entitlements */,
+				AF5287257D3A95AD5555360F /* App */,
+				387738A89B92489E70B46276 /* Core */,
+				E957D50370CA444B7D18D0D4 /* Models */,
+				8EE7980A1EF31D16911D3995 /* Resources */,
+				1249792F58964A336264613A /* Views */,
+			);
+			path = Shengvo;
+			sourceTree = "<group>";
+		};
+		E957D50370CA444B7D18D0D4 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				E002D2129995925D90E0DF58 /* AppConfig.swift */,
+				05FCC1D890BF8F7ECE625B34 /* ASRResponse.swift */,
+				56AECEE82CAA9AFEE2114795 /* HistoryEntry.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		48ACF5FA6ECBC71A34114E9A /* Shengvo */ = {
+		B3A64B0BC85A6AD456C9F946 /* Shengvo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F6BA6B0A361EA6C3A5FA240D /* Build configuration list for PBXNativeTarget "Shengvo" */;
+			buildConfigurationList = 2FB4CB5F0C4A34EE18465730 /* Build configuration list for PBXNativeTarget "Shengvo" */;
 			buildPhases = (
-				C35B10D48E421FB038B7EA39 /* Sources */,
-				F6DFAFF396317BC727C8F51C /* Resources */,
-				0C1BE95EC297B83706620FBA /* Frameworks */,
-				D13A4F04F690FEE9C6BBF5F4 /* Embed Frameworks */,
+				CAA6F0E153DA6707388BDEA6 /* Sources */,
+				9645407F20172B5C32962B2D /* Resources */,
+				FDC0190B398FCD8AA21D2AB1 /* Frameworks */,
+				9CA4941CD754452FA420B5CF /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = Shengvo;
+			packageProductDependencies = (
+			);
 			productName = Shengvo;
-			productReference = A32BB963BE2685D5364B725F /* Shengvo.app */;
+			productReference = A4CE53C7B7F24C2DC2A61754 /* Shengvo.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		B79158C72F4ABF96A4ADB0B0 /* Project object */ = {
+		DA3F85B90535A61878732CA7 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1500;
-				TargetAttributes = {
-					48ACF5FA6ECBC71A34114E9A = {
-						ProvisioningStyle = Manual;
-					};
-				};
 			};
-			buildConfigurationList = EE9E90117BEEEED3CF5BE462 /* Build configuration list for PBXProject "Shengvo" */;
+			buildConfigurationList = DED21C027A6D1B546058470D /* Build configuration list for PBXProject "Shengvo" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -222,63 +253,65 @@
 				Base,
 				en,
 			);
-			mainGroup = 8C2266E69DB8D72668BA6F67;
+			mainGroup = AAEE972D41C9F5FEB18B1E9B;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
-			productRefGroup = 0CA790D9EF8AE7E9E8A5D717 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				48ACF5FA6ECBC71A34114E9A /* Shengvo */,
+				B3A64B0BC85A6AD456C9F946 /* Shengvo */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		F6DFAFF396317BC727C8F51C /* Resources */ = {
+		9645407F20172B5C32962B2D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D6C06341A9B45B4ABDEF883C /* Assets.xcassets in Resources */,
+				BAEF24995783F1013064A7EE /* Assets.xcassets in Resources */,
+				C060EF4CA10F3526088561EC /* ggml-base-q8_0.bin in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		C35B10D48E421FB038B7EA39 /* Sources */ = {
+		CAA6F0E153DA6707388BDEA6 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F7829B241469BC9EF0E40A77 /* ASRResponse.swift in Sources */,
-				87898FB55B896D3361DCA63C /* ASRService.swift in Sources */,
-				80845358B93321BFA6EB04A9 /* AppConfig.swift in Sources */,
-				8B4D3AA0FE299F863A386F00 /* AudioRecorder.swift in Sources */,
-				3BE652F2708DECC0E8F02269 /* ClipboardManager.swift in Sources */,
-				41E05F3AB4FFC88EC87A314E /* CustomWordsView.swift in Sources */,
-				9E46E54F4B7EF8C39102D777 /* HistoryEntry.swift in Sources */,
-				35DB58185865B5412231D490 /* HistoryManager.swift in Sources */,
-				CCBBC81E1927BE097A1F9673 /* HistoryView.swift in Sources */,
-				251F34FE0613D34095CC1A0C /* HotKeyManager.swift in Sources */,
-				D24D55351033699BF4C60F48 /* HotKeyRecorderView.swift in Sources */,
-				64A1E70A0AF4878EE3A5C674 /* LLMService.swift in Sources */,
-					D1E2F3A4B5C6D7E8F9A0B1C2 /* ModelManager.swift in Sources */,
-				CFB1A2318DCC67CC59A75A4E /* RecordingOverlay.swift in Sources */,
-				C6C0B6FA685ED1E462823CD0 /* SettingComponents.swift in Sources */,
-				5B8D56432C67E1FD87DC02CB /* SettingsView.swift in Sources */,
-				E0C200FED4F67E4AF8007F01 /* SetupView.swift in Sources */,
-				D5DCA0CC3880C465C172C2E9 /* SoundManager.swift in Sources */,
-				8459FE87086708576E8B18A5 /* ShengvoApp.swift in Sources */,
-				C78E6F6B32D0925FB9A13833 /* AppLogger.swift in Sources */,
-				A1B2C3D4E5F6A7B8C9D0E1F2 /* PromptManager.swift in Sources */,
-				B2C3D4E5F6A7B8C9D0E1F2A3 /* ConversationContext.swift in Sources */,
+				7FDF149A348CC3D644FC21C7 /* ASRResponse.swift in Sources */,
+				E3EE38D61A8DA7E13AD3D61A /* ASRService.swift in Sources */,
+				816EE5A21AE43A7D4AD4EC5B /* AppConfig.swift in Sources */,
+				83E37FE663C75B6758664D4C /* AppLogger.swift in Sources */,
+				3754A15154F517E27247204C /* AppleSpeechRecognizer.swift in Sources */,
+				96C014DC1AFE97A29F226155 /* AudioRecorder.swift in Sources */,
+				48A3225D3075C577C6E8AEF3 /* ClipboardManager.swift in Sources */,
+				63AE60A723CE3BF9AF76F763 /* ConversationContext.swift in Sources */,
+				6E261E6B8D52ABEF09D2BF4B /* CustomWordsView.swift in Sources */,
+				7918890EB0A247A00670BD09 /* DatabaseQueue.swift in Sources */,
+				E7A8912FBDFBEC16BEECC1ED /* ExportService.swift in Sources */,
+				1719EBF76C3B3FA58B9BA1E8 /* HistoryEntry.swift in Sources */,
+				37A860E5BA42D2D44983A269 /* HistoryManager.swift in Sources */,
+				736CEC1F092120CC49D38B3C /* HistoryView.swift in Sources */,
+				32E257E251D4D8CA14486F2D /* HotKeyManager.swift in Sources */,
+				70CD8A8F91ED2A21966B2103 /* HotKeyRecorderView.swift in Sources */,
+				28FB3B0B10EE067D2DCB7620 /* LLMService.swift in Sources */,
+				1491DC6D00453B98F87DCF29 /* ModelManager.swift in Sources */,
+				C30CF0631ACA633C0581A705 /* PromptManager.swift in Sources */,
+				77B7EA197D5C54CB0A2208A5 /* RecordingOverlay.swift in Sources */,
+				2829D176A16A4ED4AC04D0E7 /* SettingComponents.swift in Sources */,
+				0963FD4D4303D6F9FEE5B842 /* SettingsView.swift in Sources */,
+				D8C5918C08CE65DF7A483B2D /* SetupView.swift in Sources */,
+				F10F353256A23FECA4EA95E3 /* ShengvoApp.swift in Sources */,
+				1250B42BDB0A900C381CF7F5 /* SoundManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		0E118EFCCB894A35DCA6DD57 /* Release */ = {
+		2D880F6AB588872C09E4176E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -286,18 +319,28 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 2;
 				ENABLE_HARDENED_RUNTIME = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"Shengvo\"",
+				);
 				INFOPLIST_FILE = Shengvo/App/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Shengvo晟语输入法";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MARKETING_VERSION = 2.0.0;
+				OTHER_LINKER_FLAGS = "-lsqlite3 -framework Speech";
 				PRODUCT_BUNDLE_IDENTIFIER = com.shengvo.app;
 				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Shengvo/Core/SQLite/sqlite_bridge.h";
 			};
 			name = Release;
 		};
-		3203A627CE71C3F65887EC9F /* Debug */ = {
+		8BAE8EF76C33D6A65DA53FBB /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -350,7 +393,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -362,7 +405,7 @@
 			};
 			name = Debug;
 		};
-		43E2E1B6AAD2E9E1D7519BF8 /* Release */ = {
+		94537803FE4B564E7FC3B67D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -409,7 +452,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = Shengvo;
@@ -420,47 +463,58 @@
 			};
 			name = Release;
 		};
-		444452D61C1107F7AC9A8843 /* Debug */ = {
+		B1F46DF604724604E71DBE1C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Shengvo/Shengvo.entitlements;
-				CODE_SIGN_IDENTITY = "-";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = CW5GP6RGQJ;
 				ENABLE_HARDENED_RUNTIME = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"Shengvo\"",
+				);
 				INFOPLIST_FILE = Shengvo/App/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Shengvo晟语输入法";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MARKETING_VERSION = 2.0.0;
+				OTHER_LINKER_FLAGS = "-lsqlite3 -framework Speech";
 				PRODUCT_BUNDLE_IDENTIFIER = com.shengvo.app;
 				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Shengvo/Core/SQLite/sqlite_bridge.h";
 			};
 			name = Debug;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		EE9E90117BEEEED3CF5BE462 /* Build configuration list for PBXProject "Shengvo" */ = {
+		2FB4CB5F0C4A34EE18465730 /* Build configuration list for PBXNativeTarget "Shengvo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3203A627CE71C3F65887EC9F /* Debug */,
-				43E2E1B6AAD2E9E1D7519BF8 /* Release */,
+				B1F46DF604724604E71DBE1C /* Debug */,
+				2D880F6AB588872C09E4176E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		F6BA6B0A361EA6C3A5FA240D /* Build configuration list for PBXNativeTarget "Shengvo" */ = {
+		DED21C027A6D1B546058470D /* Build configuration list for PBXProject "Shengvo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				444452D61C1107F7AC9A8843 /* Debug */,
-				0E118EFCCB894A35DCA6DD57 /* Release */,
+				8BAE8EF76C33D6A65DA53FBB /* Debug */,
+				94537803FE4B564E7FC3B67D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = B79158C72F4ABF96A4ADB0B0 /* Project object */;
+	rootObject = DA3F85B90535A61878732CA7 /* Project object */;
 }

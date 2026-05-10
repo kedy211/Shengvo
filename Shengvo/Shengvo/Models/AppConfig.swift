@@ -7,6 +7,8 @@ struct AppConfig: Codable {
     var hotKeyKeyCode: UInt32 = UInt32(kVK_ANSI_V) // V key
     var hotKeyModifiers: UInt32 = UInt32(cmdKey | shiftKey) // Cmd+Shift
     var hotKeyUsesFn: Bool = false // Whether fn is part of the hotkey
+    var hotKeyMode: String = "toggle" // "toggle" or "hold"
+    var hotKeySingleKey: String? = nil // nil = 组合键模式; "fn"/"rightCmd"/"leftOption"/"rightOption"
 
     // ASR
     var asrMode: String = "local" // "local" = Whisper, "cloud" = Volcano Engine
@@ -14,6 +16,8 @@ struct AppConfig: Codable {
     var asrAccessToken: String = ""
     var asrSecretKey: String = ""
     var asrQwenAPIKey: String = "" // 阿里云百炼 Qwen-ASR API Key
+    var asrFallbackChain: [String] = ["apple"] // Fallback 引擎列表（不含 primary）
+    var asrAllowAppleFallback: Bool = true // 是否允许 Apple Speech 作为最终兜底
     var customWords: [String] = []
 
     // LLM - Volcano Engine Ark
@@ -56,8 +60,9 @@ struct AppConfig: Codable {
     }()
 
     enum CodingKeys: String, CodingKey {
-        case hotKeyKeyCode, hotKeyModifiers, hotKeyUsesFn
+        case hotKeyKeyCode, hotKeyModifiers, hotKeyUsesFn, hotKeyMode, hotKeySingleKey
         case asrMode, asrAppID, asrAccessToken, asrSecretKey, asrQwenAPIKey
+        case asrFallbackChain, asrAllowAppleFallback
         case customWords
         case llmEnabled, llmBaseURL, llmAPIKey, llmModel
         case llmMinChars, llmReasoningEffort, minRecordingDuration
@@ -74,12 +79,16 @@ struct AppConfig: Codable {
         hotKeyKeyCode = try container.decodeIfPresent(UInt32.self, forKey: .hotKeyKeyCode) ?? UInt32(kVK_ANSI_V)
         hotKeyModifiers = try container.decodeIfPresent(UInt32.self, forKey: .hotKeyModifiers) ?? UInt32(cmdKey | shiftKey)
         hotKeyUsesFn = try container.decodeIfPresent(Bool.self, forKey: .hotKeyUsesFn) ?? false
+        hotKeyMode = try container.decodeIfPresent(String.self, forKey: .hotKeyMode) ?? "toggle"
+        hotKeySingleKey = try container.decodeIfPresent(String.self, forKey: .hotKeySingleKey)
 
         asrMode = try container.decodeIfPresent(String.self, forKey: .asrMode) ?? "local"
         asrAppID = try container.decodeIfPresent(String.self, forKey: .asrAppID) ?? ""
         asrAccessToken = try container.decodeIfPresent(String.self, forKey: .asrAccessToken) ?? ""
         asrSecretKey = try container.decodeIfPresent(String.self, forKey: .asrSecretKey) ?? ""
         asrQwenAPIKey = try container.decodeIfPresent(String.self, forKey: .asrQwenAPIKey) ?? ""
+        asrFallbackChain = try container.decodeIfPresent([String].self, forKey: .asrFallbackChain) ?? ["apple"]
+        asrAllowAppleFallback = try container.decodeIfPresent(Bool.self, forKey: .asrAllowAppleFallback) ?? true
         customWords = try container.decodeIfPresent([String].self, forKey: .customWords) ?? []
 
         llmEnabled = try container.decodeIfPresent(Bool.self, forKey: .llmEnabled) ?? true
@@ -115,12 +124,16 @@ struct AppConfig: Codable {
         try container.encode(hotKeyKeyCode, forKey: .hotKeyKeyCode)
         try container.encode(hotKeyModifiers, forKey: .hotKeyModifiers)
         try container.encode(hotKeyUsesFn, forKey: .hotKeyUsesFn)
+        try container.encode(hotKeyMode, forKey: .hotKeyMode)
+        try container.encode(hotKeySingleKey, forKey: .hotKeySingleKey)
 
         try container.encode(asrMode, forKey: .asrMode)
         try container.encode(asrAppID, forKey: .asrAppID)
         try container.encode(asrAccessToken, forKey: .asrAccessToken)
         try container.encode(asrSecretKey, forKey: .asrSecretKey)
         try container.encode(asrQwenAPIKey, forKey: .asrQwenAPIKey)
+        try container.encode(asrFallbackChain, forKey: .asrFallbackChain)
+        try container.encode(asrAllowAppleFallback, forKey: .asrAllowAppleFallback)
         try container.encode(customWords, forKey: .customWords)
 
         try container.encode(llmEnabled, forKey: .llmEnabled)
@@ -166,6 +179,16 @@ struct AppConfig: Codable {
     }
 
     // MARK: - Helpers
+
+    var asrModeLabel: String {
+        switch asrMode {
+        case "local": return "Whisper 本地"
+        case "cloud": return "火山引擎"
+        case "qwen_cloud": return "阿里云 Qwen"
+        case "apple": return "Apple Speech"
+        default: return asrMode
+        }
+    }
 
     var hotKeyDescription: String {
         var desc = ""

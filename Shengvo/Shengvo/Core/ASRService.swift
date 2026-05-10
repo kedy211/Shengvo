@@ -6,12 +6,80 @@ class ASRService {
 
     init() {}
 
-    func recognize(audioData: Data, completion: @escaping (Result<String, Error>) -> Void) {
-        switch AppConfig.shared.asrMode {
+    /// 识别入口：先尝试主引擎，失败按 fallback 链依次尝试
+    /// 返回结果中已记录实际使用的引擎名
+    func recognize(audioData: Data, completion: @escaping (Result<(text: String, engineUsed: String), Error>) -> Void) {
+        let config = AppConfig.shared
+        let primary = config.asrMode
+
+        tryEngine(audioData: audioData, engine: primary) { [weak self] result in
+            switch result {
+            case .success(let text):
+                completion(.success((text, primary)))
+            case .failure:
+                self?.tryFallbackChain(audioData: audioData, config: config, completion: completion)
+            }
+        }
+    }
+
+    private func tryFallbackChain(
+        audioData: Data,
+        config: AppConfig,
+        completion: @escaping (Result<(text: String, engineUsed: String), Error>) -> Void
+    ) {
+        let chain = config.asrFallbackChain
+        guard !chain.isEmpty else {
+            completion(.failure(ASRError.allEnginesFailed))
+            return
+        }
+
+        print("[ASR] Primary engine failed, trying fallback chain: \(chain)")
+
+        tryNextFallback(audioData: audioData, chain: chain, index: 0, config: config, completion: completion)
+    }
+
+    private func tryNextFallback(
+        audioData: Data,
+        chain: [String],
+        index: Int,
+        config: AppConfig,
+        completion: @escaping (Result<(text: String, engineUsed: String), Error>) -> Void
+    ) {
+        guard index < chain.count else {
+            completion(.failure(ASRError.allEnginesFailed))
+            return
+        }
+
+        let engine = chain[index]
+        print("[ASR] Trying fallback engine #\(index + 1): \(engine)")
+
+        // Check availability
+        if engine == "apple" && !config.asrAllowAppleFallback {
+            print("[ASR] Apple Speech fallback disabled, skipping")
+            tryNextFallback(audioData: audioData, chain: chain, index: index + 1, config: config, completion: completion)
+            return
+        }
+
+        tryEngine(audioData: audioData, engine: engine) { [weak self] result in
+            switch result {
+            case .success(let text):
+                print("[ASR] Fallback engine \(engine) succeeded")
+                completion(.success((text, engine)))
+            case .failure(let error):
+                print("[ASR] Fallback engine \(engine) failed: \(error.localizedDescription)")
+                self?.tryNextFallback(audioData: audioData, chain: chain, index: index + 1, config: config, completion: completion)
+            }
+        }
+    }
+
+    private func tryEngine(audioData: Data, engine: String, completion: @escaping (Result<String, Error>) -> Void) {
+        switch engine {
         case "cloud":
             recognizeCloud(audioData: audioData, completion: completion)
         case "qwen_cloud":
             recognizeQwenCloud(audioData: audioData, completion: completion)
+        case "apple":
+            recognizeAppleSpeech(audioData: audioData, completion: completion)
         default:
             recognizeLocal(audioData: audioData, completion: completion)
         }
@@ -324,6 +392,32 @@ class ASRService {
     }
 }
 
+    // MARK: - Apple Speech (built-in)
+
+    private func recognizeAppleSpeech(audioData: Data, completion: @escaping (Result<String, Error>) -> Void) {
+        guard let recognizer = AppleSpeechRecognizer() else {
+            completion(.failure(AppleSpeechError.notAvailable))
+            return
+        }
+
+        // Save audio data to temp file for SFSpeechURLRecognitionRequest
+        let tempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension("wav")
+        do {
+            try audioData.write(to: tempURL, options: .atomic)
+        } catch {
+            completion(.failure(error))
+            return
+        }
+
+        recognizer.recognize(audioFileURL: tempURL, timeout: 15) { result in
+            // Clean up temp file
+            try? FileManager.default.removeItem(at: tempURL)
+            completion(result)
+        }
+    }
+
 // MARK: - Whisper Actor (thread-safe wrapper)
 
 actor WhisperActor {
@@ -398,6 +492,7 @@ enum ASRError: LocalizedError {
     case modelNotFound
     case modelLoadFailed
     case inferenceFailed
+    case allEnginesFailed
 
     var errorDescription: String? {
         switch self {
@@ -410,6 +505,7 @@ enum ASRError: LocalizedError {
         case .modelNotFound: return "Whisper 模型文件未找到"
         case .modelLoadFailed: return "Whisper 模型加载失败"
         case .inferenceFailed: return "Whisper 推理失败"
+        case .allEnginesFailed: return "所有语音识别引擎均失败"
         }
     }
 }

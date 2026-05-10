@@ -5,7 +5,9 @@ import AVFoundation
 
 enum SettingsTab: String, CaseIterable {
     case general = "通用"
-    case models = "模型设置"
+    case asr = "语音识别"
+    case llm = "LLM 处理"
+    case prompt = "系统提示词"
     case customWords = "自定义识别词"
     case history = "历史记录"
     case about = "关于"
@@ -13,7 +15,9 @@ enum SettingsTab: String, CaseIterable {
     var icon: String {
         switch self {
         case .general: return "gearshape"
-        case .models: return "cpu"
+        case .asr: return "mic.fill"
+        case .llm: return "brain"
+        case .prompt: return "text.quote"
         case .customWords: return "text.word.spacing"
         case .history: return "clock.arrow.circlepath"
         case .about: return "info.circle"
@@ -32,6 +36,7 @@ struct SettingsView: View {
     @State private var accessGranted = false
     @State private var customWords: [String] = AppConfig.shared.customWords
     @State private var historyEntries: [HistoryEntry] = []
+    @State private var audioPlayer: AVAudioPlayer?
 
     init() {
         let initial = Self.pendingTab ?? .general
@@ -45,6 +50,7 @@ struct SettingsView: View {
         NavigationSplitView {
             sidebar
                 .navigationSplitViewColumnWidth(180)
+                .background(.ultraThinMaterial)
         } detail: {
             detailContent
         }
@@ -83,7 +89,7 @@ struct SettingsView: View {
                 }
                 .padding(.vertical, 10)
             }
-            .background(Color(nsColor: .windowBackgroundColor))
+            .background(.ultraThinMaterial)
         }
     }
 
@@ -94,8 +100,12 @@ struct SettingsView: View {
         switch selectedTab {
         case .general:
             generalSettings
-        case .models:
-            modelSettings
+        case .asr:
+            asrSettings
+        case .llm:
+            llmSettings
+        case .prompt:
+            promptSettings
         case .customWords:
             customWordsSettings
         case .history:
@@ -115,7 +125,15 @@ struct SettingsView: View {
                 HotKeyRecorderView(
                     keyCode: $config.hotKeyKeyCode,
                     modifiers: $config.hotKeyModifiers,
-                    usesFn: $config.hotKeyUsesFn
+                    usesFn: $config.hotKeyUsesFn,
+                    hotKeyMode: Binding<String>(
+                        get: { config.hotKeyMode },
+                        set: { config.hotKeyMode = $0 }
+                    ),
+                    hotKeySingleKey: Binding<String?>(
+                        get: { config.hotKeySingleKey },
+                        set: { config.hotKeySingleKey = $0 }
+                    )
                 )
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
@@ -167,7 +185,7 @@ struct SettingsView: View {
             }
             .padding(.vertical, 16)
         }
-        .background(Color(nsColor: .controlBackgroundColor))
+        .background(.ultraThinMaterial)
     }
 
     private func permissionRow(icon: String, title: String, granted: Bool, action: @escaping () -> Void) -> some View {
@@ -200,15 +218,13 @@ struct SettingsView: View {
         .padding(.vertical, 10)
     }
 
-    // MARK: - Model Settings
+    // MARK: - ASR Settings
 
-    private var modelSettings: some View {
+    private var asrSettings: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                // ASR Section
-                SectionHeader(title: "语音识别 (ASR)")
+                SectionHeader(title: "语音识别引擎")
 
-                // ASR Mode Picker
                 HStack(spacing: 12) {
                     Text("识别引擎")
                         .font(.system(size: 14, weight: .regular))
@@ -224,7 +240,6 @@ struct SettingsView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
-                .frame(height: 40)
 
                 if config.asrMode == "local" {
                     HStack(spacing: 8) {
@@ -262,7 +277,148 @@ struct SettingsView: View {
 
                 Divider().padding(.horizontal, 16)
 
-                // LLM Section
+                // Fallback Chain
+                SectionHeader(title: "故障转移")
+
+                HStack(spacing: 8) {
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                    Text("主引擎失败时，按顺序尝试以下备选引擎")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 8)
+
+                // Fallback chain list
+                VStack(spacing: 4) {
+                    // Primary engine (always shown, non-removable)
+                    fallbackChainRow(label: "主引擎", engine: config.asrModeLabel, isPrimary: true, onMoveUp: nil, onMoveDown: nil, onRemove: nil)
+
+                    ForEach(Array(config.asrFallbackChain.enumerated()), id: \.offset) { index, engine in
+                        fallbackChainRow(
+                            label: "备选 \(index + 1)",
+                            engine: engineLabel(engine),
+                            isPrimary: false,
+                            onMoveUp: index > 0 ? { moveFallback(from: index, to: index - 1) } : nil,
+                            onMoveDown: index < config.asrFallbackChain.count - 1 ? { moveFallback(from: index, to: index + 1) } : nil,
+                            onRemove: { config.asrFallbackChain.remove(at: index) }
+                        )
+                    }
+
+                    // Add button
+                    if config.asrFallbackChain.count < 3 {
+                        Menu {
+                            if !config.asrFallbackChain.contains("local") && config.asrMode != "local" {
+                                Button("本地 Whisper") { config.asrFallbackChain.append("local") }
+                            }
+                            if !config.asrFallbackChain.contains("cloud") && config.asrMode != "cloud" {
+                                Button("火山引擎") { config.asrFallbackChain.append("cloud") }
+                            }
+                            if !config.asrFallbackChain.contains("qwen_cloud") && config.asrMode != "qwen_cloud" {
+                                Button("阿里云 Qwen") { config.asrFallbackChain.append("qwen_cloud") }
+                            }
+                            if !config.asrFallbackChain.contains("apple") && config.asrAllowAppleFallback {
+                                Button("Apple Speech") { config.asrFallbackChain.append("apple") }
+                            }
+                        } label: {
+                            HStack {
+                                Image(systemName: "plus.circle")
+                                    .font(.system(size: 12))
+                                Text("添加备选引擎")
+                                    .font(.system(size: 12))
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 6)
+                        }
+                        .menuStyle(.borderlessButton)
+                        .fixedSize()
+                    }
+                }
+                .padding(.horizontal, 16)
+
+                // Apple Speech toggle
+                SettingToggleRow(
+                    title: "允许 Apple Speech 作为最终兜底",
+                    subtitle: "所有备选引擎失败后，使用系统内置语音识别。注意：音频会发送至 Apple 服务器。",
+                    isOn: $config.asrAllowAppleFallback
+                )
+            }
+            .padding(.vertical, 16)
+        }
+        .background(.ultraThinMaterial)
+    }
+
+    private func fallbackChainRow(label: String, engine: String, isPrimary: Bool, onMoveUp: (() -> Void)?, onMoveDown: (() -> Void)?, onRemove: (() -> Void)?) -> some View {
+        HStack(spacing: 8) {
+            Text(label)
+                .font(.system(size: 11, weight: .regular))
+                .foregroundColor(.secondary)
+                .frame(width: 40, alignment: .leading)
+
+            Text(engine)
+                .font(.system(size: 13, weight: .regular))
+                .foregroundColor(.primary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(isPrimary ? Color.accentColor.opacity(0.1) : Color.primary.opacity(0.06))
+                )
+
+            Spacer()
+
+            if !isPrimary {
+                HStack(spacing: 4) {
+                    if let onMoveUp = onMoveUp {
+                        Button(action: onMoveUp) {
+                            Image(systemName: "chevron.up")
+                                .font(.system(size: 10, weight: .bold))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    if let onMoveDown = onMoveDown {
+                        Button(action: onMoveDown) {
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: 10, weight: .bold))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    if let onRemove = onRemove {
+                        Button(action: onRemove) {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 12))
+                                .foregroundColor(.red.opacity(0.6))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func moveFallback(from: Int, to: Int) {
+        guard to >= 0, to < config.asrFallbackChain.count else { return }
+        config.asrFallbackChain.swapAt(from, to)
+    }
+
+    private func engineLabel(_ engine: String) -> String {
+        switch engine {
+        case "local": return "Whisper 本地"
+        case "cloud": return "火山引擎"
+        case "qwen_cloud": return "阿里云 Qwen"
+        case "apple": return "Apple Speech"
+        default: return engine
+        }
+    }
+
+    // MARK: - LLM Settings
+
+    private var llmSettings: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
                 SectionHeader(title: "大语言模型 (LLM)")
 
                 SettingToggleRow(title: "启用文本整理", subtitle: "语音识别后自动调用 LLM 优化文本", isOn: $config.llmEnabled)
@@ -279,88 +435,39 @@ struct SettingsView: View {
                         range: 0...1000
                     )
 
-                    // Reasoning Effort
                     reasoningEffortRow
 
                     Divider().padding(.horizontal, 16)
 
-                    // System Prompt — 自定义覆盖模式
-                    SectionHeader(title: "系统提示词")
+                    // System prompt preview (read-only, short)
+                    SectionHeader(title: "当前系统提示词")
+                    let promptText = config.effectiveSystemPrompt
+                    let preview = String(promptText.prefix(100))
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(preview + (promptText.count > 100 ? "..." : ""))
+                            .font(.system(size: 11, weight: .regular, design: .monospaced))
+                            .foregroundColor(.secondary)
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
 
-                    SettingToggleRow(
-                        title: "启用自定义系统提示词",
-                        subtitle: "开启后可编辑完整的系统提示词，覆盖默认的模块化提示词",
-                        isOn: Binding<Bool>(
-                            get: { config.customSystemPromptOverride != nil },
-                            set: { enabled in
-                                if enabled {
-                                    config.customSystemPromptOverride = config.effectiveSystemPrompt
-                                } else {
-                                    config.customSystemPromptOverride = nil
-                                }
-                            }
-                        )
-                    )
-
-                    if config.customSystemPromptOverride != nil {
-                        SettingTextEditor(
-                            title: "自定义提示词",
-                            subtitle: "直接编辑系统提示词。清空内容并关闭上方开关可恢复默认。",
-                            placeholder: "输入系统提示词...",
-                            text: Binding<String>(
-                                get: { config.customSystemPromptOverride ?? "" },
-                                set: { config.customSystemPromptOverride = $0 }
-                            )
-                        )
-
-                        // 重置按钮
                         HStack {
                             Spacer()
-                            Button("重置为默认提示词") {
-                                config.customSystemPromptOverride = nil
-                            }
-                            .font(.system(size: 12))
-                            .foregroundColor(.accentColor)
-                            .buttonStyle(.borderless)
+                            Text("共 \(promptText.count) 字 · 完整内容见「系统提示词」标签页")
+                                .font(.system(size: 10, weight: .regular))
+                                .foregroundColor(.secondary)
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 8)
                     }
-
-                    // 默认提示词预览（只读）
-                    if config.customSystemPromptOverride == nil {
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Text("当前默认提示词（只读预览）")
-                                    .font(.system(size: 12, weight: .regular))
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                                Text("\(PromptManager.systemPrompt(mode: .polish).count) 字")
-                                    .font(.system(size: 11, weight: .regular))
-                                    .foregroundColor(.secondary)
-                            }
-
-                            ScrollView {
-                                Text(PromptManager.systemPrompt(mode: .polish))
-                                    .font(.system(size: 11, weight: .regular, design: .monospaced))
-                                    .foregroundColor(.secondary)
-                                    .textSelection(.enabled)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            }
-                            .frame(height: 140)
-                            .padding(10)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(Color.primary.opacity(0.03))
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(Color.primary.opacity(0.08), lineWidth: 0.5)
-                            )
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                    }
+                    .padding(10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(Color.primary.opacity(0.03))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color.primary.opacity(0.08), lineWidth: 0.5)
+                    )
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 4)
 
                     Divider().padding(.horizontal, 16)
 
@@ -419,7 +526,99 @@ struct SettingsView: View {
             }
             .padding(.vertical, 16)
         }
-        .background(Color(nsColor: .controlBackgroundColor))
+        .background(.ultraThinMaterial)
+    }
+
+    // MARK: - Prompt Settings
+
+    private var promptSettings: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                SectionHeader(title: "系统提示词")
+
+                Text("系统提示词决定 LLM 如何润色你的语音文本。可编辑全部内容，或恢复默认。")
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 8)
+
+                SettingToggleRow(
+                    title: "启用自定义系统提示词",
+                    subtitle: "开启后可编辑完整的系统提示词，覆盖默认的模块化提示词",
+                    isOn: Binding<Bool>(
+                        get: { config.customSystemPromptOverride != nil },
+                        set: { enabled in
+                            if enabled {
+                                config.customSystemPromptOverride = config.effectiveSystemPrompt
+                            } else {
+                                config.customSystemPromptOverride = nil
+                            }
+                        }
+                    )
+                )
+
+                if config.customSystemPromptOverride != nil {
+                    SettingTextEditor(
+                        title: "自定义提示词",
+                        subtitle: "直接编辑系统提示词。清空内容并关闭上方开关可恢复默认。热词会自动追加到提示词末尾。",
+                        placeholder: "输入系统提示词...",
+                        text: Binding<String>(
+                            get: { config.customSystemPromptOverride ?? "" },
+                            set: { config.customSystemPromptOverride = $0 }
+                        )
+                    )
+
+                    HStack {
+                        Spacer()
+                        Button("重置为默认提示词") {
+                            config.customSystemPromptOverride = nil
+                        }
+                        .font(.system(size: 12))
+                        .foregroundColor(.accentColor)
+                        .buttonStyle(.borderless)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 8)
+                }
+
+                // Default prompt preview
+                if config.customSystemPromptOverride == nil {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("当前默认提示词（只读预览）")
+                                .font(.system(size: 12, weight: .regular))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text("\(PromptManager.systemPrompt(mode: .polish).count) 字")
+                                .font(.system(size: 11, weight: .regular))
+                                .foregroundColor(.secondary)
+                        }
+
+                        ScrollView {
+                            Text(PromptManager.systemPrompt(mode: .polish))
+                                .font(.system(size: 11, weight: .regular, design: .monospaced))
+                                .foregroundColor(.secondary)
+                                .textSelection(.enabled)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .frame(height: 200)
+                        .padding(10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(Color.primary.opacity(0.03))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.primary.opacity(0.08), lineWidth: 0.5)
+                        )
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                }
+            }
+            .padding(.vertical, 16)
+        }
+        .background(.ultraThinMaterial)
     }
 
     private var reasoningEffortRow: some View {
@@ -499,7 +698,7 @@ struct SettingsView: View {
             }
             .padding(.vertical, 16)
         }
-        .background(Color(nsColor: .controlBackgroundColor))
+        .background(.ultraThinMaterial)
     }
 
     private func wordRow(word: String, index: Int) -> some View {
@@ -558,7 +757,21 @@ struct SettingsView: View {
 
                         Spacer()
 
+                        Button("导出全部") {
+                            stopAudio()
+                            let exportEntries = HistoryManager.shared.getEntriesForExport()
+                            ExportService.shared.exportEntries(exportEntries) { success, path in
+                                if success, let path = path {
+                                    NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: path)])
+                                }
+                            }
+                        }
+                        .font(.system(size: 12))
+                        .foregroundColor(.accentColor)
+                        .buttonStyle(.borderless)
+
                         Button("清空全部") {
+                            stopAudio()
                             HistoryManager.shared.clearAll()
                             historyEntries = []
                         }
@@ -579,11 +792,14 @@ struct SettingsView: View {
             }
             .padding(.vertical, 16)
         }
-        .background(Color(nsColor: .controlBackgroundColor))
+        .background(.ultraThinMaterial)
     }
 
     private func historyRow(entry: HistoryEntry) -> some View {
-        HStack(alignment: .top, spacing: 10) {
+        let hasAudio = entry.audioFilename != nil
+        let isThisPlaying = audioPlayer?.isPlaying == true && audioPlayer?.url?.lastPathComponent == entry.audioFilename
+
+        return HStack(alignment: .top, spacing: 10) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(entry.relativeTime)
                     .font(.system(size: 12, weight: .regular))
@@ -601,19 +817,41 @@ struct SettingsView: View {
                         )
                 }
 
-                if entry.wasProcessedByLLM {
-                    Text("LLM")
-                        .font(.system(size: 11, weight: .regular))
-                        .foregroundColor(.accentColor)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.accentColor.opacity(0.1))
-                        )
+                HStack(spacing: 4) {
+                    // ASR engine tag
+                    if !entry.asrMode.isEmpty {
+                        Text(entry.asrModeLabel)
+                            .font(.system(size: 10, weight: .regular))
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 2)
+                            .background(
+                                RoundedRectangle(cornerRadius: 3)
+                                    .fill(Color.primary.opacity(0.06))
+                            )
+                    }
+
+                    if entry.wasProcessedByLLM {
+                        Text("LLM")
+                            .font(.system(size: 10, weight: .regular))
+                            .foregroundColor(.accentColor)
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 2)
+                            .background(
+                                RoundedRectangle(cornerRadius: 3)
+                                    .fill(Color.accentColor.opacity(0.1))
+                            )
+                    }
+                }
+
+                // Timing info
+                if entry.totalDurationMs > 0 {
+                    Text("\(entry.totalDurationMs)ms")
+                        .font(.system(size: 10, weight: .regular))
+                        .foregroundColor(.secondary.opacity(0.7))
                 }
             }
-            .frame(width: 80, alignment: .leading)
+            .frame(width: 90, alignment: .leading)
 
             Text(entry.truncatedText)
                 .font(.system(size: 13, weight: .regular))
@@ -622,6 +860,22 @@ struct SettingsView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             VStack(spacing: 4) {
+                if hasAudio {
+                    Button {
+                        if isThisPlaying {
+                            stopAudio()
+                        } else {
+                            playAudio(entry: entry)
+                        }
+                    } label: {
+                        Image(systemName: isThisPlaying ? "stop.fill" : "play.circle")
+                            .font(.system(size: 12))
+                            .foregroundColor(isThisPlaying ? .orange : .accentColor)
+                    }
+                    .buttonStyle(.plain)
+                    .help(isThisPlaying ? "停止播放" : "播放录音")
+                }
+
                 Button {
                     ClipboardManager.shared.copyToClipboard(text: entry.text)
                 } label: {
@@ -633,6 +887,7 @@ struct SettingsView: View {
                 .help("复制")
 
                 Button {
+                    if isThisPlaying { stopAudio() }
                     HistoryManager.shared.deleteEntry(id: entry.id)
                     historyEntries.removeAll { $0.id == entry.id }
                 } label: {
@@ -647,7 +902,11 @@ struct SettingsView: View {
         .padding(10)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color.primary.opacity(0.04))
+                .fill(.regularMaterial)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
         )
         .onTapGesture(count: 2) {
             ClipboardManager.shared.copyAndPaste(text: entry.text)
@@ -741,7 +1000,7 @@ struct SettingsView: View {
             }
             .padding(.vertical, 16)
         }
-        .background(Color(nsColor: .controlBackgroundColor))
+        .background(.ultraThinMaterial)
     }
 
     private func aboutFeature(_ title: String, _ desc: String) -> some View {
@@ -813,6 +1072,23 @@ struct SettingsView: View {
         historyEntries = HistoryManager.shared.getAllEntries()
     }
 
+    private func playAudio(entry: HistoryEntry) {
+        guard let filename = entry.audioFilename,
+              let url = HistoryManager.shared.audioURL(for: filename) else { return }
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.prepareToPlay()
+            audioPlayer?.play()
+        } catch {
+            print("[History] Audio playback error: \(error)")
+        }
+    }
+
+    private func stopAudio() {
+        audioPlayer?.stop()
+        audioPlayer = nil
+    }
+
     private func refreshPermissions() {
         micGranted = AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
         let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): false] as CFDictionary
@@ -842,7 +1118,7 @@ struct CustomWordInputView: View {
                 .padding(.horizontal, 8)
                 .background(
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(Color(nsColor: .textBackgroundColor))
+                        .fill(.thinMaterial)
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 6)
