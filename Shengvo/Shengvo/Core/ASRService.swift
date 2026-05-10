@@ -139,11 +139,22 @@ class ASRService {
                 }
             }
 
-            self.pollResult(taskID: taskID, completion: completion)
+            self.pollResult(taskID: taskID, attempt: 0, completion: completion)
         }.resume()
     }
 
-    private func pollResult(taskID: String, completion: @escaping (Result<String, Error>) -> Void) {
+    /// 自适应轮询间隔（ms）：200 → 350 → 550 → 800 → 1000（封顶）
+    private func pollInterval(for attempt: Int) -> Double {
+        switch attempt {
+        case 0:  return 0.20
+        case 1:  return 0.35
+        case 2:  return 0.55
+        case 3:  return 0.80
+        default: return 1.00
+        }
+    }
+
+    private func pollResult(taskID: String, attempt: Int, completion: @escaping (Result<String, Error>) -> Void) {
         let queryURL = "https://openspeech-direct.zijieapi.com/api/v3/auc/bigmodel/query"
         guard let url = URL(string: queryURL) else {
             completion(.failure(ASRError.invalidURL))
@@ -196,8 +207,10 @@ class ASRService {
                     completion(.failure(error))
                 }
             } else if apiStatus == "20000001" || apiStatus == "20000002" {
-                DispatchQueue.global().asyncAfter(deadline: .now() + 1.0) {
-                    self.pollResult(taskID: taskID, completion: completion)
+                let delay = pollInterval(for: attempt)
+                print("[ASR] Poll attempt \(attempt), waiting \(String(format: "%.0f", delay * 1000))ms")
+                DispatchQueue.global().asyncAfter(deadline: .now() + delay) {
+                    self.pollResult(taskID: taskID, attempt: attempt + 1, completion: completion)
                 }
             } else {
                 let msg = httpResponse.allHeaderFields["X-Api-Message"] as? String ?? "Unknown error"

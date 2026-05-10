@@ -33,6 +33,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var escMonitors: [Any] = []
     private var targetAppName: String?
     private var lastRawText: String = ""
+    private var currentAudioFilename: String?
 
     // MARK: - App Lifecycle
 
@@ -274,6 +275,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let startTime = CFAbsoluteTimeGetCurrent()
         print("[Timing] 开始 ASR 识别...")
 
+        // 提前创建 entryId 并保存音频文件
+        let entryId = UUID()
+        currentAudioFilename = HistoryManager.shared.saveAudio(audioData, for: entryId)
+
         asrService.recognize(audioData: audioData) { [weak self] result in
             guard let self = self else { return }
 
@@ -289,6 +294,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 self.processTextWithLLM(text)
             case .failure(let error):
                 print("[Timing] ASR 失败: \(String(format: "%.2f", elapsed))s, 错误: \(error)")
+                // ASR 失败，删除已保存的音频文件
+                if let fn = self.currentAudioFilename {
+                    HistoryManager.shared.deleteAudio(named: fn)
+                }
+                self.currentAudioFilename = nil
                 self.resetState()
                 self.showError("识别失败: \(error.localizedDescription)")
             }
@@ -363,15 +373,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             rawText: lastRawText,
             timestamp: Date(),
             targetApp: targetAppName,
-            wasProcessedByLLM: wasProcessedByLLM
+            wasProcessedByLLM: wasProcessedByLLM,
+            audioFilename: currentAudioFilename
         )
+        currentAudioFilename = nil
         HistoryManager.shared.addEntry(entry)
 
         // Reset state before paste (so recording can start again)
         resetState()
 
         // Inject text via Accessibility API; fallback to clipboard Cmd+V
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
             ClipboardManager.shared.pasteText(text)
             let pasteTime = CFAbsoluteTimeGetCurrent() - startTime
             print("[Timing] 粘贴完成: \(String(format: "%.2f", pasteTime))s")

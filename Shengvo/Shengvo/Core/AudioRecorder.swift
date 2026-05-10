@@ -80,9 +80,14 @@ class AudioRecorder: ObservableObject {
             return
         }
 
-        let wavData = createWAVData(from: audioBuffer)
+        let samples = audioBuffer
         audioBuffer.removeAll()
-        completion(wavData)
+        DispatchQueue.global(qos: .userInitiated).async {
+            let wavData = AudioRecorder.encodeWAV(samples: samples, sampleRate: self.sampleRate)
+            DispatchQueue.main.async {
+                completion(wavData)
+            }
+        }
     }
 
     func cancelRecording() {
@@ -120,7 +125,7 @@ class AudioRecorder: ObservableObject {
         return outputBuffer
     }
 
-    private func createWAVData(from samples: [Float]) -> Data {
+    static func encodeWAV(samples: [Float], sampleRate: Double) -> Data {
         var data = Data()
 
         let numChannels: UInt16 = 1
@@ -146,10 +151,13 @@ class AudioRecorder: ObservableObject {
         data.append(contentsOf: "data".utf8)
         data.append(contentsOf: withUnsafeBytes(of: dataSize.littleEndian) { Array($0) })
 
-        for sample in samples {
-            let clamped = max(-1.0, min(1.0, sample))
-            let intSample = Int16(clamped * 32767)
-            data.append(contentsOf: withUnsafeBytes(of: intSample.littleEndian) { Array($0) })
+        var intSamples = [Int16](repeating: 0, count: samples.count)
+        for i in 0..<samples.count {
+            let clamped = max(-1.0, min(1.0, samples[i]))
+            intSamples[i] = Int16(clamped * 32767)
+        }
+        intSamples.withUnsafeBufferPointer { ptr in
+            data.append(ptr)
         }
 
         return data

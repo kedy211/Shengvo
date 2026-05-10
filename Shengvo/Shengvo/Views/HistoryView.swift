@@ -1,7 +1,9 @@
 import SwiftUI
+import AVFoundation
 
 struct HistoryView: View {
     @State private var historyEntries: [HistoryEntry] = []
+    @State private var audioPlayer: AVAudioPlayer?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -14,6 +16,7 @@ struct HistoryView: View {
 
                 if !historyEntries.isEmpty {
                     Button("清空全部") {
+                        stopAudio()
                         HistoryManager.shared.clearAll()
                         historyEntries = []
                     }
@@ -42,7 +45,16 @@ struct HistoryView: View {
                 ScrollView {
                     LazyVStack(spacing: 8) {
                         ForEach(historyEntries) { entry in
-                            HistoryRow(entry: entry) {
+                            HistoryRow(entry: entry, isPlaying: audioPlayer?.isPlaying == true && audioPlayer?.url?.lastPathComponent == entry.audioFilename) {
+                                if audioPlayer?.isPlaying == true && audioPlayer?.url?.lastPathComponent == entry.audioFilename {
+                                    stopAudio()
+                                } else {
+                                    playAudio(for: entry)
+                                }
+                            } onDelete: {
+                                if audioPlayer?.isPlaying == true && audioPlayer?.url?.lastPathComponent == entry.audioFilename {
+                                    stopAudio()
+                                }
                                 historyEntries.removeAll { $0.id == entry.id }
                             }
                         }
@@ -55,11 +67,34 @@ struct HistoryView: View {
         .onAppear {
             historyEntries = HistoryManager.shared.getAllEntries()
         }
+        .onDisappear {
+            stopAudio()
+        }
+    }
+
+    private func playAudio(for entry: HistoryEntry) {
+        guard let filename = entry.audioFilename,
+              let url = HistoryManager.shared.audioURL(for: filename) else { return }
+
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.prepareToPlay()
+            audioPlayer?.play()
+        } catch {
+            print("[History] Audio playback error: \(error)")
+        }
+    }
+
+    private func stopAudio() {
+        audioPlayer?.stop()
+        audioPlayer = nil
     }
 }
 
 struct HistoryRow: View {
     let entry: HistoryEntry
+    var isPlaying: Bool
+    let onPlay: () -> Void
     let onDelete: () -> Void
 
     @State private var showCopied = false
@@ -99,6 +134,15 @@ struct HistoryRow: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             VStack(spacing: 4) {
+                if entry.audioFilename != nil {
+                    Button(action: onPlay) {
+                        Image(systemName: isPlaying ? "stop.fill" : "play.circle")
+                            .foregroundColor(isPlaying ? .orange : .accentColor)
+                    }
+                    .buttonStyle(.plain)
+                    .help(isPlaying ? "停止播放" : "播放录音")
+                }
+
                 Button(action: {
                     ClipboardManager.shared.copyToClipboard(text: entry.text)
                     showCopied = true

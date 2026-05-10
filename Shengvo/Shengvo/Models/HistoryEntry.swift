@@ -7,14 +7,16 @@ struct HistoryEntry: Codable, Identifiable {
     let timestamp: Date
     let targetApp: String?
     let wasProcessedByLLM: Bool
+    let audioFilename: String?
 
-    init(text: String, rawText: String, timestamp: Date = Date(), targetApp: String? = nil, wasProcessedByLLM: Bool = false) {
+    init(text: String, rawText: String, timestamp: Date = Date(), targetApp: String? = nil, wasProcessedByLLM: Bool = false, audioFilename: String? = nil) {
         self.id = UUID()
         self.text = text
         self.rawText = rawText
         self.timestamp = timestamp
         self.targetApp = targetApp
         self.wasProcessedByLLM = wasProcessedByLLM
+        self.audioFilename = audioFilename
     }
 
     var relativeTime: String {
