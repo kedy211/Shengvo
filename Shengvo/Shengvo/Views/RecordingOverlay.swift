@@ -7,24 +7,36 @@ class RecordingOverlay {
     private let viewModel = OverlayViewModel()
 
     func showRecording() {
-        viewModel.state = .recording
-        showWindow()
+        DispatchQueue.main.async { [weak self] in
+            self?.viewModel.state = .recording
+            self?.showWindow()
+        }
     }
 
     func showProcessing() {
-        viewModel.state = .processing
+        DispatchQueue.main.async { [weak self] in
+            self?.viewModel.state = .processing
+        }
     }
 
     func hide() {
-        DispatchQueue.main.async {
-            self.window?.orderOut(nil)
-            self.window = nil
-            self.hostingView = nil
+        DispatchQueue.main.async { [weak self] in
+            self?.window?.orderOut(nil)
+            self?.window = nil
+            self?.hostingView = nil
         }
     }
 
     func updateLevel(_ level: Float) {
-        viewModel.audioLevel = level
+        DispatchQueue.main.async { [weak self] in
+            self?.viewModel.audioLevel = level
+        }
+    }
+
+    func updatePartialText(_ text: String) {
+        DispatchQueue.main.async { [weak self] in
+            self?.viewModel.partialText = text
+        }
     }
 
     private func showWindow() {
@@ -32,10 +44,14 @@ class RecordingOverlay {
 
         let contentView = OverlayContentView(viewModel: viewModel)
         let hosting = NSHostingController(rootView: contentView)
-        hosting.view.frame = NSRect(x: 0, y: 0, width: 128, height: 35)
+
+        // Dynamic sizing: fit content, max 350pt wide
+        let fitSize = hosting.view.fittingSize
+        let panelWidth: CGFloat = max(128, min(350, fitSize.width))
+        let panelHeight: CGFloat = max(35, fitSize.height)
 
         let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 128, height: 35),
+            contentRect: NSRect(x: 0, y: 0, width: panelWidth, height: panelHeight),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -52,14 +68,13 @@ class RecordingOverlay {
         panel.becomesKeyOnlyIfNeeded = true
 
         // Position at bottom center of main display
-        let windowWidth: CGFloat = 128
         let bottomMargin: CGFloat = 40
 
         let x: CGFloat
         let y: CGFloat
         if let screen = NSScreen.main {
             let screenFrame = screen.visibleFrame
-            x = screenFrame.midX - windowWidth / 2
+            x = screenFrame.midX - panelWidth / 2
             y = screenFrame.minY + bottomMargin
         } else {
             x = 400
@@ -79,6 +94,7 @@ class RecordingOverlay {
 class OverlayViewModel: ObservableObject {
     @Published var state: OverlayState = .hidden
     @Published var audioLevel: Float = 0
+    @Published var partialText: String = ""
 }
 
 enum OverlayState {
@@ -96,27 +112,38 @@ struct OverlayContentView: View {
     private let timer = Timer.publish(every: 0.08, on: .main, in: .common).autoconnect()
 
     var body: some View {
-        HStack(spacing: 8) {
-            if viewModel.state == .recording {
-                Image("inputicon")
-                    .resizable()
-                    .frame(width: 14, height: 14)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
+        VStack(spacing: 2) {
+            HStack(spacing: 8) {
+                if viewModel.state == .recording {
+                    Image("inputicon")
+                        .resizable()
+                        .frame(width: 14, height: 14)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
 
-                WaveView(level: viewModel.audioLevel, phase: wavePhase)
-                    .frame(width: 56, height: 19)
-            } else if viewModel.state == .processing {
-                ProgressView()
-                    .progressViewStyle(.circular)
-                    .scaleEffect(0.65)
-                    .frame(width: 13, height: 13)
+                    WaveView(level: viewModel.audioLevel, phase: wavePhase)
+                        .frame(width: 56, height: 19)
+                } else if viewModel.state == .processing {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .scaleEffect(0.65)
+                        .frame(width: 13, height: 13)
 
-                Text("处理中...")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.white)
+                    Text("处理中...")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.white)
+                }
+            }
+
+            if viewModel.state == .recording && !viewModel.partialText.isEmpty {
+                Text(viewModel.partialText)
+                    .font(.system(size: 10, weight: .regular))
+                    .foregroundColor(.white.opacity(0.7))
+                    .lineLimit(2)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: 300)
+                    .padding(.horizontal, 4)
             }
         }
-        .frame(minHeight: 19, maxHeight: 19)
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .background(
@@ -141,7 +168,7 @@ struct OverlayContentView: View {
                     lineWidth: 0.8
                 )
         )
-        .frame(width: 128, height: 35)
+        .fixedSize()
         .onReceive(timer) { _ in
             if viewModel.state == .recording {
                 wavePhase += 0.35

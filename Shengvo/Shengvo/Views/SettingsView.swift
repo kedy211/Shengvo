@@ -258,6 +258,22 @@ struct SettingsView: View {
                     SettingTextField(title: "App ID", placeholder: "火山引擎 App ID", text: $config.asrAppID)
                     SettingTextField(title: "Access Token", placeholder: "Access Token", text: $config.asrAccessToken, isSecure: true)
                     SettingTextField(title: "Secret Key", placeholder: "Secret Key", text: $config.asrSecretKey, isSecure: true)
+
+                    Divider().padding(.horizontal, 16)
+
+                    // 流式识别开关
+                    VStack(alignment: .leading, spacing: 4) {
+                        Toggle(isOn: $config.asrStreamingEnabled) {
+                            Text("流式语音识别")
+                                .font(.system(size: 13, weight: .medium))
+                        }
+                        Text("边录音边识别，松键后约 0.3-0.5s 返回结果。需在火山引擎控制台开通实时语音识别服务（SAUC）。")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                            .padding(.leading, 20)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 4)
                 }
 
                 if config.asrMode == "qwen_cloud" {

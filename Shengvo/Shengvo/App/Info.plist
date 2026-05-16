@@ -15,12 +15,14 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.0.0</string>
+	<string>1.0</string>
 	<key>CFBundleVersion</key>
-	<string>2</string>
+	<string>1</string>
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>晟语需要访问麦克风以录制语音进行识别。</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>晟语使用语音识别将录音转换为文字。</string>
 </dict>
 </plist>

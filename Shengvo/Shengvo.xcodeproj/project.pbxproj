@@ -17,6 +17,7 @@
 		3754A15154F517E27247204C /* AppleSpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1421A8E713EEFEAB1244A4 /* AppleSpeechRecognizer.swift */; };
 		37A860E5BA42D2D44983A269 /* HistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C045102C0C51290424DCC6B9 /* HistoryManager.swift */; };
 		48A3225D3075C577C6E8AEF3 /* ClipboardManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1ACA10FA7E44B35A54EE8A /* ClipboardManager.swift */; };
+		49B26574227DC36EDFFD6484 /* BigModelWS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 309C05C30CE1FB44E5AC1C48 /* BigModelWS.swift */; };
 		63AE60A723CE3BF9AF76F763 /* ConversationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 085B8F33C0BBB16A824F8F4F /* ConversationContext.swift */; };
 		6E261E6B8D52ABEF09D2BF4B /* CustomWordsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED7E2290A1BDD8007AA7439 /* CustomWordsView.swift */; };
 		70CD8A8F91ED2A21966B2103 /* HotKeyRecorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90ED8B77A4E5BF4442BBE248 /* HotKeyRecorderView.swift */; };
@@ -56,6 +57,7 @@
 		05FCC1D890BF8F7ECE625B34 /* ASRResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASRResponse.swift; sourceTree = "<group>"; };
 		085B8F33C0BBB16A824F8F4F /* ConversationContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationContext.swift; sourceTree = "<group>"; };
 		2F7C89776C6A8CA1E5B7008E /* sqlite3.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sqlite3.h; sourceTree = "<group>"; };
+		309C05C30CE1FB44E5AC1C48 /* BigModelWS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BigModelWS.swift; sourceTree = "<group>"; };
 		36A6D17219C05740DF5B20B7 /* ModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManager.swift; sourceTree = "<group>"; };
 		36F8692473F29078D570176B /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
 		38ED9F322B212CEC84E23288 /* ASRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASRService.swift; sourceTree = "<group>"; };
@@ -141,6 +143,7 @@
 				49C09AD172326907D6F488AA /* AppLogger.swift */,
 				38ED9F322B212CEC84E23288 /* ASRService.swift */,
 				4079616F647BF7EEEAE0468B /* AudioRecorder.swift */,
+				309C05C30CE1FB44E5AC1C48 /* BigModelWS.swift */,
 				5C1ACA10FA7E44B35A54EE8A /* ClipboardManager.swift */,
 				085B8F33C0BBB16A824F8F4F /* ConversationContext.swift */,
 				36F8692473F29078D570176B /* ExportService.swift */,
@@ -286,6 +289,7 @@
 				83E37FE663C75B6758664D4C /* AppLogger.swift in Sources */,
 				3754A15154F517E27247204C /* AppleSpeechRecognizer.swift in Sources */,
 				96C014DC1AFE97A29F226155 /* AudioRecorder.swift in Sources */,
+				49B26574227DC36EDFFD6484 /* BigModelWS.swift in Sources */,
 				48A3225D3075C577C6E8AEF3 /* ClipboardManager.swift in Sources */,
 				63AE60A723CE3BF9AF76F763 /* ConversationContext.swift in Sources */,
 				6E261E6B8D52ABEF09D2BF4B /* CustomWordsView.swift in Sources */,
@@ -319,21 +323,17 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
 				ENABLE_HARDENED_RUNTIME = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"Shengvo\"",
 				);
 				INFOPLIST_FILE = Shengvo/App/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Shengvo晟语输入法";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 2.0.0;
-				OTHER_LINKER_FLAGS = "-lsqlite3 -framework Speech";
+				OTHER_LINKER_FLAGS = "-lsqlite3 -lz -framework Speech";
 				PRODUCT_BUNDLE_IDENTIFIER = com.shengvo.app;
 				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Shengvo/Core/SQLite/sqlite_bridge.h";
@@ -471,7 +471,6 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = CW5GP6RGQJ;
 				ENABLE_HARDENED_RUNTIME = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -479,14 +478,11 @@
 					"\"Shengvo\"",
 				);
 				INFOPLIST_FILE = Shengvo/App/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Shengvo晟语输入法";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 2.0.0;
-				OTHER_LINKER_FLAGS = "-lsqlite3 -framework Speech";
+				OTHER_LINKER_FLAGS = "-lsqlite3 -lz -framework Speech";
 				PRODUCT_BUNDLE_IDENTIFIER = com.shengvo.app;
 				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Shengvo/Core/SQLite/sqlite_bridge.h";

@@ -38,6 +38,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var llmDurationMs: Int = 0
     private var asrModeUsed: String = ""
 
+    // WebSocket streaming ASR
+    private var streamingWS: BigModelWS?
+    private var streamingTimer: Timer?
+    private var streamingActive = false
+
     // MARK: - App Lifecycle
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -211,6 +216,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         overlay.showRecording()
         startLevelTimer()
         startESC_monitor()
+
+        // 启动流式 ASR（如果启用）
+        let config = AppConfig.shared
+        if config.asrMode == "cloud" && config.asrStreamingEnabled
+            && !config.asrAppID.isEmpty && !config.asrAccessToken.isEmpty {
+            startStreaming()
+        }
     }
 
     private func stopRecordingAndProcess() {
@@ -246,7 +258,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             let elapsed = CFAbsoluteTimeGetCurrent() - self.processStartTime
             print("[Timing] 录音停止 → 数据就绪: \(String(format: "%.2f", elapsed))s, 音频大小: \(audioData.count) bytes")
 
-            self.processAudio(audioData)
+            if self.streamingActive {
+                self.finishStreaming(audioData: audioData)
+            } else {
+                self.processAudio(audioData)
+            }
         }
     }
 
@@ -300,8 +316,110 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         print("[App] Recording cancelled by ESC")
         stopESC_monitor()
         stopLevelTimer()
+        stopStreaming()
         audioRecorder.cancelRecording()
         resetState()
+    }
+
+    // MARK: - Streaming ASR
+
+    private func startStreaming() {
+        let config = AppConfig.shared
+        let ws = BigModelWS(resourceID: config.asrStreamingResourceID)
+
+        ws.onPartialResult = { [weak self] text in
+            DispatchQueue.main.async {
+                self?.overlay.updatePartialText(text)
+            }
+        }
+
+        ws.connect(appID: config.asrAppID, accessToken: config.asrAccessToken)
+        streamingWS = ws
+        streamingActive = true
+
+        // 200ms 定时器，非破坏性读取音频分片并发送
+        streamingTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { [weak self] _ in
+            guard let self = self, self.streamingActive else { return }
+            if let chunk = self.audioRecorder.readStreamingChunk(sampleCount: 3200) {
+                self.streamingWS?.sendAudioChunk(pcmSamples: chunk, isLast: false)
+            }
+        }
+
+        print("[App] Streaming ASR started")
+    }
+
+    private func finishStreaming(audioData: Data) {
+        streamingTimer?.invalidate()
+        streamingTimer = nil
+        streamingActive = false
+
+        // 发送剩余样本
+        let remaining = audioRecorder.readAllRemainingSamples()
+
+        // 保存 WAV 用于历史记录和 REST 回退
+        let entryId = UUID()
+        currentAudioFilename = HistoryManager.shared.saveAudio(audioData, for: entryId)
+
+        let startTime = CFAbsoluteTimeGetCurrent()
+        let ws = streamingWS
+        streamingWS = nil
+
+        ws?.finish(remainingSamples: remaining, timeout: 5.0) { [weak self] result in
+            guard let self = self else { return }
+
+            let elapsed = CFAbsoluteTimeGetCurrent() - startTime
+            let totalElapsed = CFAbsoluteTimeGetCurrent() - self.processStartTime
+
+            switch result {
+            case .success(let text):
+                let elapsedMs = Int(elapsed * 1000)
+                self.asrDurationMs = elapsedMs
+                self.asrModeUsed = "cloud_streaming"
+                print("[Timing] ASR 完成(cloud_streaming): \(String(format: "%.2f", elapsed))s, 总耗时: \(String(format: "%.2f", totalElapsed))s")
+                print("[Timing] 识别结果: \(text)")
+                AppLogger.shared.logASR(mode: "cloud_streaming", inputSize: audioData.count, output: text, durationMs: elapsedMs)
+                self.lastRawText = text
+                self.processTextWithLLM(text)
+
+            case .failure(let error):
+                print("[App] Streaming ASR failed: \(error), falling back to REST")
+                // 回退到现有 REST 轮询
+                self.asrService.recognize(audioData: audioData) { [weak self] result in
+                    guard let self = self else { return }
+
+                    let fallbackElapsed = CFAbsoluteTimeGetCurrent() - startTime
+                    let fallbackTotal = CFAbsoluteTimeGetCurrent() - self.processStartTime
+
+                    switch result {
+                    case .success(let (text, engineUsed)):
+                        let elapsedMs = Int(fallbackElapsed * 1000)
+                        self.asrDurationMs = elapsedMs
+                        self.asrModeUsed = engineUsed
+                        print("[Timing] ASR 完成(\(engineUsed), fallback): \(String(format: "%.2f", fallbackElapsed))s, 总耗时: \(String(format: "%.2f", fallbackTotal))s")
+                        print("[Timing] 识别结果: \(text)")
+                        AppLogger.shared.logASR(mode: engineUsed, inputSize: audioData.count, output: text, durationMs: elapsedMs)
+                        self.processTextWithLLM(text)
+
+                    case .failure(let asrError):
+                        print("[Timing] ASR fallback 也失败: \(asrError)")
+                        if let fn = self.currentAudioFilename {
+                            HistoryManager.shared.deleteAudio(named: fn)
+                        }
+                        self.currentAudioFilename = nil
+                        self.resetState()
+                        self.showError("识别失败: \(asrError.localizedDescription)")
+                    }
+                }
+            }
+        }
+    }
+
+    private func stopStreaming() {
+        streamingTimer?.invalidate()
+        streamingTimer = nil
+        streamingWS?.cancel()
+        streamingWS = nil
+        streamingActive = false
     }
 
     // MARK: - Processing
@@ -448,8 +566,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         asrDurationMs = 0
         llmDurationMs = 0
         asrModeUsed = ""
+        streamingActive = false
         updateStatusIcon(state: .idle)
         updateMenuStatus("就绪")
+        overlay.updatePartialText("")
         overlay.hide()
     }
 

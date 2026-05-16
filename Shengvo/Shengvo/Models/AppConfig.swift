@@ -16,6 +16,8 @@ struct AppConfig: Codable {
     var asrAccessToken: String = ""
     var asrSecretKey: String = ""
     var asrQwenAPIKey: String = "" // 阿里云百炼 Qwen-ASR API Key
+    var asrStreamingEnabled: Bool = false // 是否启用 WebSocket 流式识别（仅 cloud 模式生效）
+    var asrStreamingResourceID: String = "volc.bigasr.sauc.duration" // 流式识别 Resource ID
     var asrFallbackChain: [String] = ["apple"] // Fallback 引擎列表（不含 primary）
     var asrAllowAppleFallback: Bool = true // 是否允许 Apple Speech 作为最终兜底
     var customWords: [String] = []
@@ -62,6 +64,7 @@ struct AppConfig: Codable {
     enum CodingKeys: String, CodingKey {
         case hotKeyKeyCode, hotKeyModifiers, hotKeyUsesFn, hotKeyMode, hotKeySingleKey
         case asrMode, asrAppID, asrAccessToken, asrSecretKey, asrQwenAPIKey
+        case asrStreamingEnabled, asrStreamingResourceID
         case asrFallbackChain, asrAllowAppleFallback
         case customWords
         case llmEnabled, llmBaseURL, llmAPIKey, llmModel
@@ -87,6 +90,8 @@ struct AppConfig: Codable {
         asrAccessToken = try container.decodeIfPresent(String.self, forKey: .asrAccessToken) ?? ""
         asrSecretKey = try container.decodeIfPresent(String.self, forKey: .asrSecretKey) ?? ""
         asrQwenAPIKey = try container.decodeIfPresent(String.self, forKey: .asrQwenAPIKey) ?? ""
+        asrStreamingEnabled = try container.decodeIfPresent(Bool.self, forKey: .asrStreamingEnabled) ?? false
+        asrStreamingResourceID = try container.decodeIfPresent(String.self, forKey: .asrStreamingResourceID) ?? "volc.bigasr.sauc.duration"
         asrFallbackChain = try container.decodeIfPresent([String].self, forKey: .asrFallbackChain) ?? ["apple"]
         asrAllowAppleFallback = try container.decodeIfPresent(Bool.self, forKey: .asrAllowAppleFallback) ?? true
         customWords = try container.decodeIfPresent([String].self, forKey: .customWords) ?? []
@@ -132,6 +137,8 @@ struct AppConfig: Codable {
         try container.encode(asrAccessToken, forKey: .asrAccessToken)
         try container.encode(asrSecretKey, forKey: .asrSecretKey)
         try container.encode(asrQwenAPIKey, forKey: .asrQwenAPIKey)
+        try container.encode(asrStreamingEnabled, forKey: .asrStreamingEnabled)
+        try container.encode(asrStreamingResourceID, forKey: .asrStreamingResourceID)
         try container.encode(asrFallbackChain, forKey: .asrFallbackChain)
         try container.encode(asrAllowAppleFallback, forKey: .asrAllowAppleFallback)
         try container.encode(customWords, forKey: .customWords)

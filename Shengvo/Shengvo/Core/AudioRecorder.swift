@@ -9,12 +9,14 @@ class AudioRecorder: ObservableObject {
     private var audioBuffer: [Float] = []
     private var timer: Timer?
     private var currentLevel: Float = 0
+    private var streamingReadPosition: Int = 0
 
     let sampleRate: Double = 16000
     let channels: AVAudioChannelCount = 1
 
     func startRecording() {
         audioBuffer.removeAll()
+        streamingReadPosition = 0
         recordingDuration = 0
 
         let inputNode = audioEngine.inputNode
@@ -95,6 +97,7 @@ class AudioRecorder: ObservableObject {
         audioEngine.stop()
         timer?.invalidate()
         audioBuffer.removeAll()
+        streamingReadPosition = 0
 
         DispatchQueue.main.async {
             self.isRecording = false
@@ -104,6 +107,26 @@ class AudioRecorder: ObservableObject {
 
     func getCurrentLevel() -> Float {
         return currentLevel
+    }
+
+    /// 非破坏性读取：提取指定数量的未消费 PCM 样本用于流式发送
+    /// 不会从 audioBuffer 中移除，不影响最终 WAV 编码
+    /// 仅从主线程调用（与 audioBuffer 追加同线程）
+    func readStreamingChunk(sampleCount: Int = 3200) -> [Float]? {
+        guard audioBuffer.count - streamingReadPosition >= sampleCount else {
+            return nil
+        }
+        let chunk = Array(audioBuffer[streamingReadPosition..<(streamingReadPosition + sampleCount)])
+        streamingReadPosition += sampleCount
+        return chunk
+    }
+
+    /// 读取所有未消费的剩余样本
+    func readAllRemainingSamples() -> [Float] {
+        guard streamingReadPosition < audioBuffer.count else { return [] }
+        let remaining = Array(audioBuffer[streamingReadPosition...])
+        streamingReadPosition = audioBuffer.count
+        return remaining
     }
 
     private func convert(buffer: AVAudioPCMBuffer, to format: AVAudioFormat) -> AVAudioPCMBuffer? {

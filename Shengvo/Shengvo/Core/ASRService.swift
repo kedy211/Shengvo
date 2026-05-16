@@ -76,6 +76,9 @@ class ASRService {
         switch engine {
         case "cloud":
             recognizeCloud(audioData: audioData, completion: completion)
+        case "streaming_cloud":
+            // 流式 ASR 不走 recognize(audioData:) 路径，由 ShengvoApp 直接管理 BigModelWS 生命周期
+            completion(.failure(ASRError.wrongEnginePath))
         case "qwen_cloud":
             recognizeQwenCloud(audioData: audioData, completion: completion)
         case "apple":
@@ -493,6 +496,7 @@ enum ASRError: LocalizedError {
     case modelLoadFailed
     case inferenceFailed
     case allEnginesFailed
+    case wrongEnginePath
 
     var errorDescription: String? {
         switch self {
@@ -506,6 +510,7 @@ enum ASRError: LocalizedError {
         case .modelLoadFailed: return "Whisper 模型加载失败"
         case .inferenceFailed: return "Whisper 推理失败"
         case .allEnginesFailed: return "所有语音识别引擎均失败"
+        case .wrongEnginePath: return "流式引擎请通过 startStreaming() 启动"
         }
     }
 }
