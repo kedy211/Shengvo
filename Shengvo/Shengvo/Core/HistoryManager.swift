@@ -190,6 +190,21 @@ class HistoryManager {
             "SELECT * FROM entries ORDER BY timestamp DESC"
         ) { HistoryEntry(row: $0) }
     }
+
+    /// 返回最近 N 条成功 LLM 处理的平均耗时（秒）；无数据返回 0
+    func averageLLMDuration(limit: Int = 20) -> TimeInterval {
+        let rows = db.executeReturning("""
+            SELECT llm_duration_ms FROM entries
+            WHERE was_llm_processed = 1 AND llm_duration_ms > 0
+            ORDER BY timestamp DESC
+            LIMIT ?
+        """, [limit]) { row -> Int64? in
+            row["llm_duration_ms"] as? Int64
+        }
+        guard !rows.isEmpty else { return 0 }
+        let total = rows.reduce(0) { $0 + $1 }
+        return Double(total) / Double(rows.count) / 1000.0
+    }
 }
 
 // MARK: - Legacy model for JSON migration

@@ -16,6 +16,15 @@ class RecordingOverlay {
     func showProcessing() {
         DispatchQueue.main.async { [weak self] in
             self?.viewModel.state = .processing
+            self?.viewModel.progress = 0
+            self?.viewModel.phaseLabel = "正在识别..."
+        }
+    }
+
+    func updateProgress(progress: Double, phaseLabel: String) {
+        DispatchQueue.main.async { [weak self] in
+            self?.viewModel.progress = progress
+            self?.viewModel.phaseLabel = phaseLabel
         }
     }
 
@@ -95,6 +104,8 @@ class OverlayViewModel: ObservableObject {
     @Published var state: OverlayState = .hidden
     @Published var audioLevel: Float = 0
     @Published var partialText: String = ""
+    @Published var progress: Double = 0
+    @Published var phaseLabel: String = ""
 }
 
 enum OverlayState {
@@ -112,40 +123,55 @@ struct OverlayContentView: View {
     private let timer = Timer.publish(every: 0.08, on: .main, in: .common).autoconnect()
 
     var body: some View {
-        VStack(spacing: 2) {
-            HStack(spacing: 8) {
-                if viewModel.state == .recording {
-                    Image("inputicon")
-                        .resizable()
-                        .frame(width: 14, height: 14)
-                        .clipShape(RoundedRectangle(cornerRadius: 4))
-
-                    WaveView(level: viewModel.audioLevel, phase: wavePhase)
-                        .frame(width: 56, height: 19)
-                } else if viewModel.state == .processing {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .scaleEffect(0.65)
-                        .frame(width: 13, height: 13)
-
-                    Text("处理中...")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.white)
+        ZStack(alignment: .leading) {
+            // 处理阶段：进度条填充整个浮窗
+            if viewModel.state == .processing {
+                GeometryReader { geo in
+                    Rectangle()
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.cyan.opacity(0.35), Color.blue.opacity(0.22)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: max(17, geo.size.width * viewModel.progress))
+                        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: viewModel.progress)
                 }
             }
 
-            if viewModel.state == .recording && !viewModel.partialText.isEmpty {
-                Text(viewModel.partialText)
-                    .font(.system(size: 10, weight: .regular))
-                    .foregroundColor(.white.opacity(0.7))
-                    .lineLimit(2)
-                    .truncationMode(.tail)
-                    .frame(maxWidth: 300)
-                    .padding(.horizontal, 4)
+            // 内容层
+            VStack(spacing: 2) {
+                HStack(spacing: 8) {
+                    if viewModel.state == .recording {
+                        Image("inputicon")
+                            .resizable()
+                            .frame(width: 14, height: 14)
+                            .clipShape(RoundedRectangle(cornerRadius: 4))
+
+                        WaveView(level: viewModel.audioLevel, phase: wavePhase)
+                            .frame(width: 56, height: 19)
+                    } else if viewModel.state == .processing {
+                        Text(viewModel.phaseLabel)
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(.white)
+                            .frame(width: 78, height: 19)
+                    }
+                }
+
+                if viewModel.state == .recording && !viewModel.partialText.isEmpty {
+                    Text(viewModel.partialText)
+                        .font(.system(size: 10, weight: .regular))
+                        .foregroundColor(.white.opacity(0.7))
+                        .lineLimit(2)
+                        .truncationMode(.tail)
+                        .frame(maxWidth: 300)
+                        .padding(.horizontal, 4)
+                }
             }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
         .background(
             ZStack {
                 VisualEffectView(material: .hudWindow, blendingMode: .behindWindow)
@@ -203,12 +229,12 @@ struct WaveView: View {
     let level: Float
     let phase: Double
 
-    private let barCount = 4
-    private let barWidth: CGFloat = 2
+    private let barCount = 5
+    private let barWidth: CGFloat = 2.5
     private let maxHeight: CGFloat = 18
 
     var body: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: 2.5) {
             ForEach(0..<barCount, id: \.self) { index in
                 let offset = Double(index) * 0.5
                 let boosted = pow(CGFloat(max(0.05, level)), 0.6)

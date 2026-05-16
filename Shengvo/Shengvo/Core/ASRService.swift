@@ -8,16 +8,16 @@ class ASRService {
 
     /// 识别入口：先尝试主引擎，失败按 fallback 链依次尝试
     /// 返回结果中已记录实际使用的引擎名
-    func recognize(audioData: Data, completion: @escaping (Result<(text: String, engineUsed: String), Error>) -> Void) {
+    func recognize(audioData: Data, onProgress: ((Double) -> Void)? = nil, completion: @escaping (Result<(text: String, engineUsed: String), Error>) -> Void) {
         let config = AppConfig.shared
         let primary = config.asrMode
 
-        tryEngine(audioData: audioData, engine: primary) { [weak self] result in
+        tryEngine(audioData: audioData, engine: primary, onProgress: onProgress) { [weak self] result in
             switch result {
             case .success(let text):
                 completion(.success((text, primary)))
             case .failure:
-                self?.tryFallbackChain(audioData: audioData, config: config, completion: completion)
+                self?.tryFallbackChain(audioData: audioData, config: config, onProgress: onProgress, completion: completion)
             }
         }
     }
@@ -25,6 +25,7 @@ class ASRService {
     private func tryFallbackChain(
         audioData: Data,
         config: AppConfig,
+        onProgress: ((Double) -> Void)? = nil,
         completion: @escaping (Result<(text: String, engineUsed: String), Error>) -> Void
     ) {
         let chain = config.asrFallbackChain
@@ -35,7 +36,7 @@ class ASRService {
 
         print("[ASR] Primary engine failed, trying fallback chain: \(chain)")
 
-        tryNextFallback(audioData: audioData, chain: chain, index: 0, config: config, completion: completion)
+        tryNextFallback(audioData: audioData, chain: chain, index: 0, config: config, onProgress: onProgress, completion: completion)
     }
 
     private func tryNextFallback(
@@ -43,6 +44,7 @@ class ASRService {
         chain: [String],
         index: Int,
         config: AppConfig,
+        onProgress: ((Double) -> Void)? = nil,
         completion: @escaping (Result<(text: String, engineUsed: String), Error>) -> Void
     ) {
         guard index < chain.count else {
@@ -56,26 +58,26 @@ class ASRService {
         // Check availability
         if engine == "apple" && !config.asrAllowAppleFallback {
             print("[ASR] Apple Speech fallback disabled, skipping")
-            tryNextFallback(audioData: audioData, chain: chain, index: index + 1, config: config, completion: completion)
+            tryNextFallback(audioData: audioData, chain: chain, index: index + 1, config: config, onProgress: onProgress, completion: completion)
             return
         }
 
-        tryEngine(audioData: audioData, engine: engine) { [weak self] result in
+        tryEngine(audioData: audioData, engine: engine, onProgress: onProgress) { [weak self] result in
             switch result {
             case .success(let text):
                 print("[ASR] Fallback engine \(engine) succeeded")
                 completion(.success((text, engine)))
             case .failure(let error):
                 print("[ASR] Fallback engine \(engine) failed: \(error.localizedDescription)")
-                self?.tryNextFallback(audioData: audioData, chain: chain, index: index + 1, config: config, completion: completion)
+                self?.tryNextFallback(audioData: audioData, chain: chain, index: index + 1, config: config, onProgress: onProgress, completion: completion)
             }
         }
     }
 
-    private func tryEngine(audioData: Data, engine: String, completion: @escaping (Result<String, Error>) -> Void) {
+    private func tryEngine(audioData: Data, engine: String, onProgress: ((Double) -> Void)? = nil, completion: @escaping (Result<String, Error>) -> Void) {
         switch engine {
         case "cloud":
-            recognizeCloud(audioData: audioData, completion: completion)
+            recognizeCloud(audioData: audioData, onProgress: onProgress, completion: completion)
         case "streaming_cloud":
             // 流式 ASR 不走 recognize(audioData:) 路径，由 ShengvoApp 直接管理 BigModelWS 生命周期
             completion(.failure(ASRError.wrongEnginePath))
@@ -139,7 +141,7 @@ class ASRService {
 
     // MARK: - Cloud (Volcano Engine)
 
-    private func recognizeCloud(audioData: Data, completion: @escaping (Result<String, Error>) -> Void) {
+    private func recognizeCloud(audioData: Data, onProgress: ((Double) -> Void)? = nil, completion: @escaping (Result<String, Error>) -> Void) {
         let taskID = UUID().uuidString
 
         let submitURL = "https://openspeech-direct.zijieapi.com/api/v3/auc/bigmodel/submit"
@@ -210,7 +212,7 @@ class ASRService {
                 }
             }
 
-            self.pollResult(taskID: taskID, attempt: 0, completion: completion)
+            self.pollResult(taskID: taskID, attempt: 0, onProgress: onProgress, completion: completion)
         }.resume()
     }
 
@@ -225,7 +227,18 @@ class ASRService {
         }
     }
 
-    private func pollResult(taskID: String, attempt: Int, completion: @escaping (Result<String, Error>) -> Void) {
+    /// 轮询进度映射：attempt → progress (0.0–1.0)，封顶 0.95 直到结果返回
+    private func pollProgress(for attempt: Int) -> Double {
+        switch attempt {
+        case 0:  return 0.10
+        case 1:  return 0.35
+        case 2:  return 0.65
+        case 3:  return 0.85
+        default: return 0.95
+        }
+    }
+
+    private func pollResult(taskID: String, attempt: Int, onProgress: ((Double) -> Void)? = nil, completion: @escaping (Result<String, Error>) -> Void) {
         let queryURL = "https://openspeech-direct.zijieapi.com/api/v3/auc/bigmodel/query"
         guard let url = URL(string: queryURL) else {
             completion(.failure(ASRError.invalidURL))
@@ -279,9 +292,11 @@ class ASRService {
                 }
             } else if apiStatus == "20000001" || apiStatus == "20000002" {
                 let delay = pollInterval(for: attempt)
-                print("[ASR] Poll attempt \(attempt), waiting \(String(format: "%.0f", delay * 1000))ms")
+                let progress = self.pollProgress(for: attempt)
+                print("[ASR] Poll attempt \(attempt), waiting \(String(format: "%.0f", delay * 1000))ms, progress=\(String(format: "%.0f", progress * 100))%")
+                DispatchQueue.main.async { onProgress?(progress) }
                 DispatchQueue.global().asyncAfter(deadline: .now() + delay) {
-                    self.pollResult(taskID: taskID, attempt: attempt + 1, completion: completion)
+                    self.pollResult(taskID: taskID, attempt: attempt + 1, onProgress: onProgress, completion: completion)
                 }
             } else {
                 let msg = httpResponse.allHeaderFields["X-Api-Message"] as? String ?? "Unknown error"

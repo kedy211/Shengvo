@@ -379,12 +379,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 print("[Timing] 识别结果: \(text)")
                 AppLogger.shared.logASR(mode: "cloud_streaming", inputSize: audioData.count, output: text, durationMs: elapsedMs)
                 self.lastRawText = text
-                self.processTextWithLLM(text)
+                // ASR 阶段完成 → 进度动画至 40%，然后进入 LLM
+                self.overlay.updateProgress(progress: 0.4, phaseLabel: "正在识别...")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                    self.processTextWithLLM(text)
+                }
 
             case .failure(let error):
                 print("[App] Streaming ASR failed: \(error), falling back to REST")
                 // 回退到现有 REST 轮询
-                self.asrService.recognize(audioData: audioData) { [weak self] result in
+                self.asrService.recognize(audioData: audioData, onProgress: { [weak self] asrProgress in
+                    self?.overlay.updateProgress(progress: asrProgress * 0.4, phaseLabel: "正在识别...")
+                }) { [weak self] result in
                     guard let self = self else { return }
 
                     let fallbackElapsed = CFAbsoluteTimeGetCurrent() - startTime
@@ -433,7 +439,24 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let entryId = UUID()
         currentAudioFilename = HistoryManager.shared.saveAudio(audioData, for: entryId)
 
-        asrService.recognize(audioData: audioData) { [weak self] result in
+        // 非轮询引擎用 Timer 估算进度
+        let engine = AppConfig.shared.asrMode
+        var fallbackTimer: Timer?
+        if engine != "cloud" {
+            let estimatedSec = estimateASRDuration(engine: engine)
+            let fallbackStart = CFAbsoluteTimeGetCurrent()
+            fallbackTimer = Timer.scheduledTimer(withTimeInterval: 0.15, repeats: true) { [weak self] t in
+                let elapsed = CFAbsoluteTimeGetCurrent() - fallbackStart
+                let p = min(0.95, elapsed / estimatedSec) * 0.4
+                self?.overlay.updateProgress(progress: p, phaseLabel: "正在识别...")
+            }
+        }
+
+        asrService.recognize(audioData: audioData, onProgress: { [weak self] asrProgress in
+            self?.overlay.updateProgress(progress: asrProgress * 0.4, phaseLabel: "正在识别...")
+        }) { [weak self] result in
+            fallbackTimer?.invalidate()
+
             guard let self = self else { return }
 
             let elapsed = CFAbsoluteTimeGetCurrent() - startTime
@@ -469,20 +492,35 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let config = AppConfig.shared
         guard config.llmEnabled else {
             print("[Timing] LLM 已禁用，跳过处理")
-            pasteText(text, wasProcessedByLLM: false)
+            overlay.updateProgress(progress: 1.0, phaseLabel: "完成")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+                self?.pasteText(text, wasProcessedByLLM: false)
+            }
             return
         }
 
         // Skip LLM for short text
         if text.count <= config.llmMinChars {
             print("[Timing] 文本过短(\(text.count)字 ≤ \(config.llmMinChars)字)，跳过 LLM")
-            pasteText(text, wasProcessedByLLM: false)
+            overlay.updateProgress(progress: 1.0, phaseLabel: "完成")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+                self?.pasteText(text, wasProcessedByLLM: false)
+            }
             return
         }
 
         updateMenuStatus("文本整理中...")
         let startTime = CFAbsoluteTimeGetCurrent()
         print("[Timing] 开始 LLM 处理...")
+
+        // 启动 LLM 阶段进度计时器（基于历史耗时估算）
+        let estimatedSec = estimateLLMDuration()
+        let llmStart = CFAbsoluteTimeGetCurrent()
+        let llmTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] t in
+            let elapsed = CFAbsoluteTimeGetCurrent() - llmStart
+            let llmProgress = min(0.95, elapsed / estimatedSec)
+            self?.overlay.updateProgress(progress: 0.4 + llmProgress * 0.6, phaseLabel: "正在整理...")
+        }
 
         // 多轮上下文：如果启用，传入最近 N 轮历史
         let priorTurns: [(raw: String, polished: String)]
@@ -497,6 +535,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         llmService.processText(text, targetApp: targetAppName, priorTurns: priorTurns) { [weak self] result in
             guard let self = self else { return }
+
+            llmTimer.invalidate()
 
             let elapsed = CFAbsoluteTimeGetCurrent() - startTime
             let totalElapsed = CFAbsoluteTimeGetCurrent() - self.processStartTime
@@ -513,11 +553,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                     self.llmService.conversationContext.addTurn(raw: text, polished: processedText)
                 }
 
-                self.pasteText(processedText, wasProcessedByLLM: true)
+                // 进度条跳至 100%，延迟让 spring 动画播放
+                self.overlay.updateProgress(progress: 1.0, phaseLabel: "完成")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    self.pasteText(processedText, wasProcessedByLLM: true)
+                }
             case .failure(let error):
                 print("[Timing] LLM 失败: \(String(format: "%.2f", elapsed))s, 错误: \(error), 使用原始文本")
                 self.llmDurationMs = 0
-                self.pasteText(text, wasProcessedByLLM: false)
+                self.overlay.updateProgress(progress: 1.0, phaseLabel: "完成")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    self.pasteText(text, wasProcessedByLLM: false)
+                }
             }
         }
     }
@@ -575,6 +622,22 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func logFrontmost(_ tag: String) {
         // Keep for future debugging
+    }
+
+    /// 非轮询引擎的 ASR 估算耗时（秒）
+    private func estimateASRDuration(engine: String) -> TimeInterval {
+        switch engine {
+        case "local": return 8.0
+        case "qwen_cloud": return 3.0
+        case "apple": return 2.0
+        default: return 5.0
+        }
+    }
+
+    /// 基于历史数据的 LLM 估算耗时（秒），无历史时默认 4s
+    private func estimateLLMDuration() -> TimeInterval {
+        let avg = HistoryManager.shared.averageLLMDuration(limit: 20)
+        return avg > 0 ? avg : 4.0
     }
 
     // MARK: - UI Helpers
