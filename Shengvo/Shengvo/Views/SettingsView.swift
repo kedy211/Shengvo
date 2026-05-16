@@ -140,6 +140,17 @@ struct SettingsView: View {
 
                 Divider().padding(.horizontal, 16)
 
+                // Re-paste hotkey
+                SectionHeader(title: "重新粘贴快捷键")
+                RepasteHotKeyRecorderView(
+                    keyCode: $config.repasteHotKeyKeyCode,
+                    modifiers: $config.repasteHotKeyModifiers
+                )
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+
+                Divider().padding(.horizontal, 16)
+
                 // Options
                 SectionHeader(title: "选项")
                 SettingToggleRow(title: "开机自启动", isOn: $config.launchAtLogin)

@@ -10,6 +10,10 @@ struct AppConfig: Codable {
     var hotKeyMode: String = "toggle" // "toggle" or "hold"
     var hotKeySingleKey: String? = nil // nil = 组合键模式; "fn"/"rightCmd"/"leftOption"/"rightOption"
 
+    // Re-paste hotkey
+    var repasteHotKeyKeyCode: UInt32 = UInt32(kVK_ANSI_V)
+    var repasteHotKeyModifiers: UInt32 = UInt32(optionKey)
+
     // ASR
     var asrMode: String = "local" // "local" = Whisper, "cloud" = Volcano Engine
     var asrAppID: String = ""
@@ -63,6 +67,7 @@ struct AppConfig: Codable {
 
     enum CodingKeys: String, CodingKey {
         case hotKeyKeyCode, hotKeyModifiers, hotKeyUsesFn, hotKeyMode, hotKeySingleKey
+        case repasteHotKeyKeyCode, repasteHotKeyModifiers
         case asrMode, asrAppID, asrAccessToken, asrSecretKey, asrQwenAPIKey
         case asrStreamingEnabled, asrStreamingResourceID
         case asrFallbackChain, asrAllowAppleFallback
@@ -83,6 +88,8 @@ struct AppConfig: Codable {
         hotKeyModifiers = try container.decodeIfPresent(UInt32.self, forKey: .hotKeyModifiers) ?? UInt32(cmdKey | shiftKey)
         hotKeyUsesFn = try container.decodeIfPresent(Bool.self, forKey: .hotKeyUsesFn) ?? false
         hotKeyMode = try container.decodeIfPresent(String.self, forKey: .hotKeyMode) ?? "toggle"
+        repasteHotKeyKeyCode = try container.decodeIfPresent(UInt32.self, forKey: .repasteHotKeyKeyCode) ?? UInt32(kVK_ANSI_V)
+        repasteHotKeyModifiers = try container.decodeIfPresent(UInt32.self, forKey: .repasteHotKeyModifiers) ?? UInt32(optionKey)
         hotKeySingleKey = try container.decodeIfPresent(String.self, forKey: .hotKeySingleKey)
 
         asrMode = try container.decodeIfPresent(String.self, forKey: .asrMode) ?? "local"
@@ -130,6 +137,8 @@ struct AppConfig: Codable {
         try container.encode(hotKeyModifiers, forKey: .hotKeyModifiers)
         try container.encode(hotKeyUsesFn, forKey: .hotKeyUsesFn)
         try container.encode(hotKeyMode, forKey: .hotKeyMode)
+        try container.encode(repasteHotKeyKeyCode, forKey: .repasteHotKeyKeyCode)
+        try container.encode(repasteHotKeyModifiers, forKey: .repasteHotKeyModifiers)
         try container.encode(hotKeySingleKey, forKey: .hotKeySingleKey)
 
         try container.encode(asrMode, forKey: .asrMode)
@@ -205,6 +214,16 @@ struct AppConfig: Codable {
         if hotKeyModifiers & UInt32(controlKey) != 0 { desc += "⌃" }
         if hotKeyModifiers & UInt32(optionKey) != 0 { desc += "⌥" }
         desc += keyCodeToString(hotKeyModifiers, hotKeyKeyCode)
+        return desc
+    }
+
+    var repasteHotKeyDescription: String {
+        var desc = ""
+        if repasteHotKeyModifiers & UInt32(cmdKey) != 0 { desc += "⌘" }
+        if repasteHotKeyModifiers & UInt32(shiftKey) != 0 { desc += "⇧" }
+        if repasteHotKeyModifiers & UInt32(controlKey) != 0 { desc += "⌃" }
+        if repasteHotKeyModifiers & UInt32(optionKey) != 0 { desc += "⌥" }
+        desc += keyCodeToString(repasteHotKeyModifiers, repasteHotKeyKeyCode)
         return desc
     }
 

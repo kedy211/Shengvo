@@ -1,6 +1,7 @@
 import SwiftUI
 import AppKit
 import AVFoundation
+import Carbon
 import UserNotifications
 
 @main
@@ -38,6 +39,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var llmDurationMs: Int = 0
     private var asrModeUsed: String = ""
 
+    // Re-paste
+    private var repasteHotKeyManager: HotKeyManager?
+    private var lastPastedText: String = ""
+    private var repasteMenuItem: NSMenuItem?
+
     // WebSocket streaming ASR
     private var streamingWS: BigModelWS?
     private var streamingTimer: Timer?
@@ -64,6 +70,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // otherwise handleSettingsChange will do it after user grants permissions.
         if AXIsProcessTrusted() {
             setupHotKey()
+            setupRepasteHotKey()
         }
     }
 
@@ -111,6 +118,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "自定义识别词...", action: #selector(openCustomWords), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "历史记录...", action: #selector(openHistory), keyEquivalent: ""))
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem({ [weak self] in
+            let item = NSMenuItem(title: "重新粘贴上一条", action: #selector(repasteLastAction), keyEquivalent: "")
+            self?.repasteMenuItem = item
+            self?.updateRepasteMenuItem()
+            return item
+        }())
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "设置...", action: #selector(openSettings), keyEquivalent: ","))
         menu.addItem(NSMenuItem.separator())
@@ -185,6 +199,81 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 }
             )
         }
+    }
+
+    // MARK: - Re-paste HotKey
+
+    private func setupRepasteHotKey() {
+        let config = AppConfig.shared
+        repasteHotKeyManager = HotKeyManager()
+        repasteHotKeyManager?.registerHotKey(
+            keyCode: config.repasteHotKeyKeyCode,
+            modifiers: config.repasteHotKeyModifiers,
+            onTrigger: { [weak self] in
+                self?.repasteLastResult()
+            }
+        )
+        updateRepasteMenuItem()
+    }
+
+    private func repasteLastResult() {
+        guard !lastPastedText.isEmpty else { return }
+        ClipboardManager.shared.pasteText(lastPastedText)
+    }
+
+    @objc private func repasteLastAction() {
+        repasteLastResult()
+    }
+
+    private func updateRepasteMenuItem() {
+        let config = AppConfig.shared
+        let keyStr = carbonKeyCodeToKeyEquivalent(config.repasteHotKeyKeyCode)
+        let mask = carbonModifiersToNSEvent(config.repasteHotKeyModifiers)
+        repasteMenuItem?.keyEquivalent = keyStr
+        repasteMenuItem?.keyEquivalentModifierMask = mask
+    }
+
+    private func carbonKeyCodeToKeyEquivalent(_ keyCode: UInt32) -> String {
+        switch Int(keyCode) {
+        case kVK_ANSI_A: return "a"
+        case kVK_ANSI_B: return "b"
+        case kVK_ANSI_C: return "c"
+        case kVK_ANSI_D: return "d"
+        case kVK_ANSI_E: return "e"
+        case kVK_ANSI_F: return "f"
+        case kVK_ANSI_G: return "g"
+        case kVK_ANSI_H: return "h"
+        case kVK_ANSI_I: return "i"
+        case kVK_ANSI_J: return "j"
+        case kVK_ANSI_K: return "k"
+        case kVK_ANSI_L: return "l"
+        case kVK_ANSI_M: return "m"
+        case kVK_ANSI_N: return "n"
+        case kVK_ANSI_O: return "o"
+        case kVK_ANSI_P: return "p"
+        case kVK_ANSI_Q: return "q"
+        case kVK_ANSI_R: return "r"
+        case kVK_ANSI_S: return "s"
+        case kVK_ANSI_T: return "t"
+        case kVK_ANSI_U: return "u"
+        case kVK_ANSI_V: return "v"
+        case kVK_ANSI_W: return "w"
+        case kVK_ANSI_X: return "x"
+        case kVK_ANSI_Y: return "y"
+        case kVK_ANSI_Z: return "z"
+        case kVK_Space: return " "
+        case kVK_Return: return "↩"
+        default: return ""
+        }
+    }
+
+    private func carbonModifiersToNSEvent(_ modifiers: UInt32) -> NSEvent.ModifierFlags {
+        var flags = NSEvent.ModifierFlags()
+        if modifiers & UInt32(cmdKey) != 0 { flags.insert(.command) }
+        if modifiers & UInt32(shiftKey) != 0 { flags.insert(.shift) }
+        if modifiers & UInt32(controlKey) != 0 { flags.insert(.control) }
+        if modifiers & UInt32(optionKey) != 0 { flags.insert(.option) }
+        return flags
     }
 
     // MARK: - Recording Flow
@@ -570,6 +659,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     private func pasteText(_ text: String, wasProcessedByLLM: Bool) {
+        lastPastedText = text
         let startTime = CFAbsoluteTimeGetCurrent()
         let totalElapsed = CFAbsoluteTimeGetCurrent() - processStartTime
         print("[Timing] 总处理耗时: \(String(format: "%.2f", totalElapsed))s")
@@ -748,7 +838,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         applyHotKeyConfig()
 
-        print("[App] Hotkey updated: \(config.hotKeyDescription)")
+        // Re-register re-paste hotkey
+        repasteHotKeyManager?.unregisterAll()
+        setupRepasteHotKey()
+
+        print("[App] Hotkey updated: \(config.hotKeyDescription), Re-paste: \(config.repasteHotKeyDescription)")
     }
 
     // MARK: - NSWindowDelegate
@@ -763,6 +857,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     @objc private func quitApp() {
         hotKeyManager?.unregisterAll()
+        repasteHotKeyManager?.unregisterAll()
         NSApplication.shared.terminate(nil)
     }
 }
